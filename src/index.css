@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-tech: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
+  
+  --color-tech-bg: #0B0F17;
+  --color-tech-panel: #111622;
+  --color-tech-panel-secondary: #0F172A;
+  --color-tech-border: #1E293B;
+  --color-tech-cyan: #00F2FF;
+  
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-tech-bg text-[#E0E6ED] antialiased overflow-x-hidden;
+    background-image: 
+      linear-gradient(rgba(30, 41, 59, 0.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30, 41, 59, 0.2) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#1E293B] rounded hover:bg-[#475569] transition-colors;
+  }
+}
+
+.tech-panel {
+  @apply bg-tech-panel/90 backdrop-blur-md border border-tech-border rounded-lg shadow-lg relative;
+}
+
+.tech-text-gradient {
+  @apply text-tech-cyan font-tech;
+}
+
+.h5-container {
+  @apply w-full max-w-md mx-auto h-full flex flex-col bg-tech-bg relative shadow-2xl;
+}
