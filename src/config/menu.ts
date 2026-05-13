@@ -32,7 +32,7 @@ import {
 
 export const adminMenu = [
   {
-    title: '数据大屏（驾驶舱）',
+    title: '数据大屏',
     path: '/dashboard',
     icon: BarChart2,
   },

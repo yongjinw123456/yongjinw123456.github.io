@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, FileText, Trash2, Edit, Eye, ShieldCheck, Calendar } from 'lucide-react';
+import { Search, Plus, FileText, Trash2, Edit, Eye, ShieldCheck, Calendar, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -79,6 +79,27 @@ export default function InsuranceManagement() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [activeRecord, setActiveRecord] = useState<InsuranceRecord | null>(null);
+
+  const [tiers, setTiers] = useState([
+    { id: '1', name: '一级赔付', start: '142.04', end: '144.04', fixed: '400,000', price: '8,000', limit: '2,000,000' },
+    { id: '2', name: '二级赔付', start: '144.04', end: '147.71', fixed: '2,000,000', price: '30,000', limit: '13,000,000' },
+    { id: '3', name: '三级赔付', start: '147.71', end: '--', fixed: '30,000,000', price: '--', limit: '--' },
+  ]);
+
+  const [floats, setFloats] = useState([
+    { id: '1', duration: '<= 1 天', ratio: '100%', increment: '0%', color: 'text-white' },
+    { id: '2', duration: '1 ~ 3 天', ratio: '110%', increment: '10%', color: 'text-blue-400' },
+    { id: '3', duration: '3 ~ 7 天', ratio: '120%', increment: '20%', color: 'text-orange-400' },
+    { id: '4', duration: '> 7 天', ratio: '130%', increment: '30%', color: 'text-red-400' },
+  ]);
+
+  const handleAddTier = () => {
+    setTiers([...tiers, { id: Date.now().toString(), name: `新增赔付阶梯${tiers.length+1}`, start: '0', end: '0', fixed: '0', price: '0', limit: '0' }]);
+  };
+
+  const handleAddFloat = () => {
+    setFloats([...floats, { id: Date.now().toString(), duration: '新档位', ratio: '100%', increment: '0%', color: 'text-white' }]);
+  };
 
   const openDrawer = (mode: 'create' | 'edit' | 'view', record?: InsuranceRecord) => {
     setDrawerMode(mode);
@@ -260,9 +281,8 @@ export default function InsuranceManagement() {
                    {drawerMode === 'create' ? <Plus className="w-4 h-4 text-tech-cyan" /> : drawerMode === 'edit' ? <Edit className="w-4 h-4 text-tech-cyan"/> : <FileText className="w-4 h-4 text-tech-cyan"/>}
                    {drawerMode === 'create' ? '新建保单配置' : drawerMode === 'edit' ? '编辑保单配置' : '保单配置详情'}
                  </h3>
-                 <button onClick={() => setIsDrawerOpen(false)} className="p-1 text-[#64748B] hover:text-white hover:bg-[#1E293B] rounded transition-colors">
-                    <Trash2 className="w-4 h-4" /> {/* Should be X icon but will use a close text if no X imported. Wait, I didn't import X. Let me use appropriate close method */}
-                    关闭
+                 <button onClick={() => setIsDrawerOpen(false)} className="p-1.5 text-[#64748B] hover:text-white hover:bg-[#1E293B]/80 rounded-full transition-colors flex items-center justify-center">
+                    <X className="w-5 h-5" />
                  </button>
               </div>
 
@@ -352,38 +372,33 @@ export default function InsuranceManagement() {
                                 <th className="px-3 py-2 font-medium">固定金额(元)</th>
                                 <th className="px-3 py-2 font-medium">单价(元/cm)</th>
                                 <th className="px-3 py-2 font-medium">区间上限(元)</th>
+                                {drawerMode !== 'view' && <th className="px-3 py-2 font-medium text-right">操作</th>}
                               </tr>
                             </thead>
                             <tbody className="text-xs text-white divide-y divide-[#1E293B]">
-                               <tr>
-                                  <td className="px-3 py-2">一级赔付</td>
-                                  <td className="px-3 py-2 font-mono">142.04</td>
-                                  <td className="px-3 py-2 font-mono">144.04</td>
-                                  <td className="px-3 py-2 font-mono">400,000</td>
-                                  <td className="px-3 py-2 font-mono">8,000</td>
-                                  <td className="px-3 py-2 font-mono">2,000,000</td>
-                               </tr>
-                               <tr>
-                                  <td className="px-3 py-2">二级赔付</td>
-                                  <td className="px-3 py-2 font-mono">144.04</td>
-                                  <td className="px-3 py-2 font-mono">147.71</td>
-                                  <td className="px-3 py-2 font-mono">2,000,000</td>
-                                  <td className="px-3 py-2 font-mono">30,000</td>
-                                  <td className="px-3 py-2 font-mono">13,000,000</td>
-                               </tr>
-                               <tr>
-                                  <td className="px-3 py-2">三级赔付</td>
-                                  <td className="px-3 py-2 font-mono">147.71</td>
-                                  <td className="px-3 py-2 font-mono text-[#475569]">--</td>
-                                  <td className="px-3 py-2 font-mono text-orange-400">30,000,000</td>
-                                  <td className="px-3 py-2 font-mono text-[#475569]">--</td>
-                                  <td className="px-3 py-2 font-mono text-[#475569]">--</td>
-                               </tr>
+                               {tiers.map((t) => (
+                                 <tr key={t.id}>
+                                    <td className="px-3 py-2">{t.name}</td>
+                                    <td className="px-3 py-2 font-mono">{t.start}</td>
+                                    <td className="px-3 py-2 font-mono text-[#475569]">{t.end}</td>
+                                    <td className="px-3 py-2 font-mono text-orange-400">{t.fixed}</td>
+                                    <td className="px-3 py-2 font-mono text-[#475569]">{t.price}</td>
+                                    <td className="px-3 py-2 font-mono text-[#475569]">{t.limit}</td>
+                                    {drawerMode !== 'view' && (
+                                       <td className="px-3 py-2 text-right">
+                                         <div className="flex items-center justify-end gap-1">
+                                            <button className="p-1 text-[#64748B] hover:text-tech-cyan rounded"><Edit className="w-3.5 h-3.5" /></button>
+                                            <button onClick={() => setTiers(tiers.filter(ti => ti.id !== t.id))} className="p-1 text-[#64748B] hover:text-red-400 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                                         </div>
+                                       </td>
+                                    )}
+                                 </tr>
+                               ))}
                             </tbody>
                           </table>
                         </div>
                         {drawerMode !== 'view' && (
-                          <button className="mt-3 text-xs text-tech-cyan hover:underline flex items-center gap-1"><Plus className="w-3 h-3"/>添加阶梯</button>
+                          <button onClick={handleAddTier} className="mt-3 text-xs text-tech-cyan hover:underline flex items-center gap-1"><Plus className="w-3 h-3"/>添加阶梯</button>
                         )}
                       </div>
 
@@ -396,47 +411,37 @@ export default function InsuranceManagement() {
                               <input type="checkbox" className="accent-tech-cyan" defaultChecked disabled={drawerMode === 'view'} />
                            </label>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                           <div>
-                              <label className="block text-[#94A3B8] mb-1.5">上浮触发灾害类型</label>
-                              <div className="flex gap-2">
-                                <span className="bg-[#1E293B] border border-tech-cyan/50 text-tech-cyan px-2 py-1 rounded">台风</span>
-                                <span className="bg-[#1E293B] border border-tech-cyan/50 text-tech-cyan px-2 py-1 rounded">暴雨</span>
-                              </div>
-                           </div>
-                           <div className="col-span-2">
+                        <div className="flex flex-col text-xs">
                              <table className="w-full text-left bg-[#0F172A] border border-[#1E293B] rounded mt-2">
                                 <thead>
                                   <tr className="text-[10px] text-[#64748B] border-b border-[#1E293B]">
                                     <th className="px-3 py-2 font-medium">临时淹没时长档位</th>
                                     <th className="px-3 py-2 font-medium">赔付系数</th>
                                     <th className="px-3 py-2 font-medium">增量上浮比例</th>
+                                    {drawerMode !== 'view' && <th className="px-3 py-2 font-medium text-right">操作</th>}
                                   </tr>
                                 </thead>
                                 <tbody className="text-xs text-white divide-y divide-[#1E293B]">
-                                   <tr>
-                                      <td className="px-3 py-2">{"<= 1 天"}</td>
-                                      <td className="px-3 py-2 font-mono">100%</td>
-                                      <td className="px-3 py-2 font-mono">0%</td>
-                                   </tr>
-                                   <tr>
-                                      <td className="px-3 py-2">{"1 ~ 3 天"}</td>
-                                      <td className="px-3 py-2 font-mono text-blue-400">110%</td>
-                                      <td className="px-3 py-2 font-mono text-blue-400">10%</td>
-                                   </tr>
-                                   <tr>
-                                      <td className="px-3 py-2">{"3 ~ 7 天"}</td>
-                                      <td className="px-3 py-2 font-mono text-orange-400">120%</td>
-                                      <td className="px-3 py-2 font-mono text-orange-400">20%</td>
-                                   </tr>
-                                   <tr>
-                                      <td className="px-3 py-2">{"> 7 天"}</td>
-                                      <td className="px-3 py-2 font-mono text-red-400">130%</td>
-                                      <td className="px-3 py-2 font-mono text-red-400">30%</td>
-                                   </tr>
+                                   {floats.map((f) => (
+                                      <tr key={f.id}>
+                                        <td className="px-3 py-2">{f.duration}</td>
+                                        <td className={cn("px-3 py-2 font-mono", f.color)}>{f.ratio}</td>
+                                        <td className={cn("px-3 py-2 font-mono", f.color)}>{f.increment}</td>
+                                        {drawerMode !== 'view' && (
+                                           <td className="px-3 py-2 text-right">
+                                             <div className="flex items-center justify-end gap-1">
+                                                <button className="p-1 text-[#64748B] hover:text-tech-cyan rounded"><Edit className="w-3.5 h-3.5" /></button>
+                                                <button onClick={() => setFloats(floats.filter(fl => fl.id !== f.id))} className="p-1 text-[#64748B] hover:text-red-400 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                                             </div>
+                                           </td>
+                                        )}
+                                      </tr>
+                                   ))}
                                 </tbody>
                              </table>
-                           </div>
+                             {drawerMode !== 'view' && (
+                                <button onClick={handleAddFloat} className="mt-3 w-fit text-xs text-tech-cyan hover:underline flex items-center gap-1"><Plus className="w-3 h-3"/>添加上浮档位</button>
+                             )}
                         </div>
                       </div>
                     </div>

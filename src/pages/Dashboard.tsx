@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Activity, ShieldAlert, FileText, Droplets, Droplet, Sun, Bell, Map as MapIcon, ChevronRight, Clock } from 'lucide-react';
+import { Activity, ShieldAlert, FileText, Droplets, Droplet, Sun, Bell, Map as MapIcon, ChevronRight, Clock, Video } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -156,19 +156,25 @@ export default function Dashboard() {
           <div className="p-3 grid grid-cols-2 gap-2 pb-1">
              <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col justify-center">
                 <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-0.5 flex items-center gap-1"><Droplets className="w-3 h-3 text-blue-400"/> 当前水位</div>
-                <div className="text-lg font-mono flex items-baseline" style={{ color: selected.color }}>{selected.baseLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-1">m</span></div>
+                <div className="text-lg font-mono flex items-baseline" style={{ color: selected.color }}>
+                  {selected.baseLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-1 mr-2">m</span>
+                  <span className="text-[10px] text-[#94A3B8] font-mono whitespace-nowrap bg-[#1E293B]/50 px-1 py-0.5 rounded flex items-center gap-1">
+                    <Clock className="w-2.5 h-2.5 text-tech-cyan" />
+                    {selected.stats.currentTime}
+                  </span>
+                </div>
              </div>
              <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col justify-center">
-                <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-0.5 flex items-center gap-1"><Clock className="w-3 h-3 text-tech-cyan"/> 获取时间</div>
-                <div className="text-sm font-mono text-white flex items-center h-full">{selected.stats.currentTime}</div>
+                <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1 flex items-center gap-1"><Bell className="w-3 h-3 text-yellow-400"/>累计淹没时长</div>
+                <div className="text-white font-mono text-sm">{selected.stats.cumulativeImmersion}</div>
              </div>
-             <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col justify-center">
-                <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-0.5 flex items-center gap-1"><ShieldAlert className="w-3 h-3 text-orange-500"/> 预警线</div>
-                <div className="text-lg font-mono text-orange-400 flex items-baseline">{selected.warningLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-1">m</span></div>
-             </div>
-             <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col justify-center">
-                <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-0.5 flex items-center gap-1"><ShieldAlert className="w-3 h-3 text-red-500"/> 征地线</div>
-                <div className="text-lg font-mono text-red-400 flex items-baseline">{selected.landLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-1">m</span></div>
+             <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col justify-center col-span-2">
+                <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-0.5 flex items-center gap-1"><ShieldAlert className="w-3 h-3 text-orange-500"/> 预警线 / 征地线</div>
+                <div className="text-lg font-mono flex items-baseline gap-2">
+                  <span className="text-orange-400">{selected.warningLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-1 mr-2">m</span></span>
+                  <span className="text-[#64748B] text-sm">/</span>
+                  <span className="text-red-400 ml-2">{selected.landLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-1">m</span></span>
+                </div>
              </div>
              <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col justify-center">
                 <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-0.5 flex items-center gap-1"><Activity className="w-3 h-3 text-purple-400"/> 历史最高水位</div>
@@ -238,10 +244,6 @@ export default function Dashboard() {
           
           <div className="p-3 border-t border-[#1E293B] grid grid-cols-2 gap-2 mt-auto bg-[#0F172A]/30">
              <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col">
-                <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1 flex items-center gap-1"><Bell className="w-3 h-3 text-yellow-400"/>累计淹没时长</div>
-                <div className="text-white font-mono text-sm">{selected.stats.cumulativeImmersion}</div>
-             </div>
-             <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col">
                 <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1 flex items-center gap-1"><Droplet className="w-3 h-3 text-tech-cyan"/>预泄时间</div>
                 <div className="text-white font-mono text-sm">{selected.stats.preDischargeTime}</div>
              </div>
@@ -249,13 +251,45 @@ export default function Dashboard() {
                 <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1 flex items-center gap-1"><Droplets className="w-3 h-3 text-blue-400"/>预泄量</div>
                 <div className="text-white font-mono text-sm">{selected.stats.preDischargeVolume}</div>
              </div>
-             <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col">
+             <div className="bg-[#0F172A] border border-[#1E293B] p-2 rounded flex flex-col col-span-2">
                 <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1 flex items-center gap-1"><Sun className="w-3 h-3 text-orange-400"/>干旱情况</div>
                 <div className="text-white font-mono text-sm">
                    {selected.stats.droughtDays} <span className={cn("text-[10px] ml-1", selected.stats.droughtLevel === '无' ? "text-green-400" : "text-orange-400")}>{selected.stats.droughtLevel}</span>
                 </div>
              </div>
           </div>
+        </div>
+
+        {/* Real-time Video Monitoring */}
+        <div className="bg-[#111622] rounded-lg border border-[#1E293B] flex flex-col p-4 h-[240px]">
+           <div className="flex justify-between items-center mb-3">
+             <h2 className="text-white font-bold text-sm tracking-widest flex items-center gap-2">
+               <Video className="w-4 h-4 text-tech-cyan" />
+               现场实时监控
+             </h2>
+             <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+               设备在线
+             </span>
+           </div>
+           <div className="flex-1 bg-black rounded border border-[#1E293B] relative overflow-hidden group">
+             {/* Fake video feed */}
+             <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1542360663-8f40838b8d29?auto=format&fit=crop&q=80')] bg-cover bg-center mix-blend-luminosity"></div>
+             <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_100%)] pointer-events-none"></div>
+             
+             {/* OSD (On Screen Display) typical of CCTV */}
+             <div className="absolute top-2 right-2 text-[10px] text-white/70 font-mono pointer-events-none">CH01_DAM_MAIN</div>
+             <div className="absolute bottom-2 left-2 text-[10px] text-white/70 font-mono tracking-widest pointer-events-none">
+               {new Date().toISOString().split('T')[0]} {selected.stats.currentTime}
+             </div>
+             
+             {/* Play button overlay */}
+             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+               <div className="w-10 h-10 rounded-full bg-tech-cyan/20 border border-tech-cyan/50 flex items-center justify-center backdrop-blur-sm cursor-pointer hover:scale-110 transition-transform">
+                 <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-tech-cyan ml-1"></div>
+               </div>
+             </div>
+           </div>
         </div>
       </div>
 
@@ -338,8 +372,10 @@ export default function Dashboard() {
                <div className="text-lg font-mono text-white mt-0.5">{selected.stats.warningYearCount} <span className="text-xs text-[#64748B]">次</span></div>
              </div>
              <div>
-               <div className="text-[10px] text-[#64748B] uppercase">当前预警水位</div>
-               <div className="text-lg font-mono text-red-400 mt-0.5">{selected.warningLevel.toFixed(2)} <span className="text-xs text-[#64748B]">m</span></div>
+               <div className="text-[10px] text-[#64748B] uppercase">当前预警状态</div>
+               <div className={cn("text-lg font-bold mt-0.5", selected.status === 'normal' ? 'text-green-400' : selected.status === 'danger' ? 'text-red-400' : 'text-orange-400')}>
+                 {selected.status === 'normal' ? '正常' : selected.status === 'danger' ? '红色预警' : '橙色预警'}
+               </div>
              </div>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
