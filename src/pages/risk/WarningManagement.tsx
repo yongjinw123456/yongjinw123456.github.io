@@ -261,7 +261,7 @@ export default function WarningManagement() {
                          </button>
                        )}
                        <button 
-                         onClick={() => navigate(`/risk/claims/calculator?warningEventId=${row.id}`)}
+                         onClick={() => navigate(`/risk/claims/calculator?warningEventId=${row.id}&reservoirId=${row.reservoirId}`)}
                          className="flex items-center gap-1 p-1.5 text-tech-cyan hover:text-white hover:bg-tech-cyan/20 rounded transition-colors whitespace-nowrap bg-tech-cyan/10" 
                          title="转入理赔"
                        >
