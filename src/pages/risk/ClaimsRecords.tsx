@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Plus, Download, FileText, CheckCircle, XCircle, Edit, Save, Trash2, Eye, ShieldCheck, Upload, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Search, Plus, Download, FileText, CheckCircle, XCircle, Edit, Save, Trash2, Eye, ShieldCheck, Upload, AlertTriangle, AlertCircle, Calculator } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -88,7 +88,28 @@ export default function ClaimsRecords() {
 
   useEffect(() => {
     if (action === 'create') {
-      openDrawer('create');
+      const stateDraft = location.state as any;
+      if (stateDraft) {
+         openDrawer('create', {
+           id: '',
+           reservoirName: '',
+           reservoirId: searchParams.get('reservoirId') || '',
+           warningEventDesc: '',
+           warningEventId: searchParams.get('warningEventId') || '',
+           totalAmount: stateDraft.totalAmountManual,
+           accidentAmount: stateDraft.accidentAmountManual,
+           relocationAmount: stateDraft.relocationAmountManual,
+           injuryAmount: stateDraft.injuryAmountManual,
+           upfloatAmount: stateDraft.upfloatAmount,
+           attachments: 0,
+           status: '暂存中',
+           ownerConfirmStatus: '-',
+           createdAt: '',
+           updatedAt: ''
+         } as ClaimRecord);
+      } else {
+         openDrawer('create');
+      }
     }
   }, [action]);
 
@@ -298,17 +319,22 @@ export default function ClaimsRecords() {
       {/* Drawer */}
       <AnimatePresence>
         {isDrawerOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-              onClick={() => setIsDrawerOpen(false)}
-              className="fixed inset-0 bg-[#0B0F17]/80 backdrop-blur-sm z-40" 
-            />
-            <motion.div 
-              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full sm:w-[900px] bg-[#111622] border-l border-[#1E293B] shadow-[0_0_40px_rgba(0,0,0,0.8)] z-50 flex flex-col"
-            >
-              <div className="flex items-center justify-between p-4 border-b border-[#1E293B] bg-[#0F172A] shrink-0">
+          <motion.div 
+            key="backdrop"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+            onClick={() => setIsDrawerOpen(false)}
+            className="fixed inset-0 bg-[#0B0F17]/80 backdrop-blur-sm z-40" 
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <motion.div 
+            key="drawer"
+            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 h-full w-full sm:w-[900px] bg-[#111622] border-l border-[#1E293B] shadow-[0_0_40px_rgba(0,0,0,0.8)] z-50 flex flex-col"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-[#1E293B] bg-[#0F172A] shrink-0">
                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
                    {drawerMode === 'create' ? <Plus className="w-4 h-4 text-tech-cyan" /> : drawerMode === 'edit' ? <Edit className="w-4 h-4 text-tech-cyan"/> : <FileText className="w-4 h-4 text-tech-cyan"/>}
                    {drawerMode === 'create' ? '新增理赔记录' : drawerMode === 'edit' ? '编辑理赔记录' : '理赔记录详情'}
@@ -369,21 +395,19 @@ export default function ClaimsRecords() {
                        {/* 事故 */}
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-[#1E293B]">
                          <div>
-                            <div className="text-[10px] text-[#64748B] mb-2 uppercase">事故与上浮</div>
+                            <div className="text-[10px] text-[#64748B] mb-2 uppercase">事故财产损失</div>
                             <div className="text-[10px] bg-[#0F172A] p-2 rounded font-mono text-[#94A3B8] border border-[#1E293B]">
-                               A_deducted = max(A_base - ded, 0)<br/>
-                               A = A_deducted × k(d)<br/>
-                               <span className="text-tech-cyan">A = 488万 × 1.1x</span>
+                               A = min(A1 + A2, L_a_once, L_a_year_remaining)
                             </div>
                             <div className="text-[10px] mt-2 grid grid-cols-2 gap-1 text-[#64748B]">
-                              <span>H_max: 145.00m</span><span>s_j: 144.04m</span>
-                              <span>F_j: 200w</span><span>P_j: 3w</span>
-                              <span>Deductible: 10w</span><span>k: 110%</span>
+                              <span>A1 (阶梯): 3,000,000</span>
+                              <span>A2 (上浮): {activeRecord?.upfloatAmount || 2480000}</span>
+                              <span>L_a_once: 500w</span><span>L_a_yr: 1000w</span>
                             </div>
                          </div>
                          <div className="bg-[#0F172A]/50 border border-[#1E293B] rounded p-3">
                             <label className="text-xs text-[#94A3B8] mb-1.5 block">事故赔付金额 (元) <span className="text-red-500">*</span></label>
-                            <input type="number" disabled={drawerMode === 'view'} defaultValue={activeRecord?.accidentAmount ? activeRecord.accidentAmount + (activeRecord.upfloatAmount || 0) : 5480000} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white font-mono outline-none disabled:opacity-60" />
+                            <input type="number" disabled={drawerMode === 'view'} defaultValue={activeRecord?.accidentAmount !== undefined ? (activeRecord.accidentAmount + (activeRecord.upfloatAmount || 0)) : 5480000} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white font-mono outline-none disabled:opacity-60" />
                             <label className="text-[10px] text-[#94A3B8] mt-3 mb-1.5 block">事故赔付调整说明</label>
                             <textarea disabled={drawerMode === 'view'} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white outline-none resize-none h-[40px] disabled:opacity-60" placeholder="若调整请填写..." />
                          </div>
@@ -491,7 +515,6 @@ export default function ClaimsRecords() {
                  )}
               </div>
             </motion.div>
-          </>
         )}
       </AnimatePresence>
 

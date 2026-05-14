@@ -74,7 +74,15 @@ export default function ClaimsCalculator() {
 
   const handleGenerateDraft = () => {
     // Navigate to records and trigger create modal
-    navigate(`/risk/claims/records?action=create&warningEventId=${warningEventId}&reservoirId=${reservoirId}`);
+    navigate(`/risk/claims/records?action=create&warningEventId=${warningEventId}&reservoirId=${reservoirId}`, {
+      state: {
+        accidentAmountManual: A,
+        upfloatAmount: U,
+        relocationAmountManual: R,
+        injuryAmountManual: C,
+        totalAmountManual: T_final
+      }
+    });
   };
 
   return (

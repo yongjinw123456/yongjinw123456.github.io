@@ -190,6 +190,7 @@ export default function InsuranceManagement() {
                 <th className="px-4 py-3 font-medium">承保对象</th>
                 <th className="px-4 py-3 font-medium">保险期限</th>
                 <th className="px-4 py-3 font-medium text-right">保险费(元)</th>
+                <th className="px-4 py-3 font-medium text-right">每次事故绝对免赔额(元)</th>
                 <th className="px-4 py-3 font-medium text-right">年累计赔偿限额(元)</th>
                 <th className="px-4 py-3 font-medium">承保公司</th>
                 <th className="px-4 py-3 font-medium">承保状态</th>
@@ -209,6 +210,7 @@ export default function InsuranceManagement() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-white">{(row.premium / 10000).toFixed(2)}万</td>
+                  <td className="px-4 py-3 text-right font-mono text-white">{(row.deductible / 10000).toFixed(2)}万</td>
                   <td className="px-4 py-3 text-right font-mono text-white">{(row.annualLimit / 10000).toFixed(2)}万</td>
                   <td className="px-4 py-3 text-[#94A3B8]">{row.company}</td>
                   <td className="px-4 py-3">

@@ -120,7 +120,7 @@ export default function WarningManagement() {
   };
 
   // Correcting mock data
-  const list = MOCK_LIST.map(item => ({...item, status: item.status === '处理中' ? '待处理' : item.status}));
+  const list = MOCK_LIST.map(item => ({...item, status: (item.status as string) === '处理中' ? '待处理' : item.status}));
 
   return (
     <div className="h-full flex flex-col p-6 gap-4 fade-in duration-300">
