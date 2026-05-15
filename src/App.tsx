@@ -27,6 +27,7 @@ import Menu from './pages/system/Menu';
 import LoginLog from './pages/system/LoginLog';
 import OperationLog from './pages/system/OperationLog';
 import SmsLog from './pages/system/SmsLog';
+import H5ClaimsCalculator from './pages/h5/H5ClaimsCalculator';
 
 export default function App() {
   return (
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="/h5/events" element={<Events />} />
           <Route path="/h5/profile" element={<Profile />} />
         </Route>
+        <Route path="/h5/claims/calculator" element={<H5ClaimsCalculator />} />
 
       </Routes>
     </BrowserRouter>

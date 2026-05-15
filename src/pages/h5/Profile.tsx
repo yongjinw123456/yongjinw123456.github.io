@@ -1,4 +1,4 @@
-import { User, Shield, ChevronRight, Lock, LogOut, Bell, FileText } from 'lucide-react';
+import { User, Shield, ChevronRight, Lock, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -14,12 +14,12 @@ export default function Profile() {
              <User className="w-8 h-8 text-[#64748B]" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white mb-1">张三</h1>
-            <p className="text-xs text-[#94A3B8] flex items-center gap-1.5 mb-1.5">
+            <h1 className="text-xl font-bold text-white mb-1">张三</h1>
+            <p className="text-sm text-[#94A3B8] flex items-center gap-2 mb-1.5">
                温州市水利局
             </p>
-            <div className="inline-flex items-center gap-1 bg-[#1E293B] px-2 py-0.5 rounded text-[10px] text-tech-cyan border border-tech-cyan/20 cursor-default">
-              <Shield className="w-3 h-3" /> 监管方人员
+            <div className="inline-flex items-center gap-1 bg-[#1E293B] px-2 py-1 rounded text-xs text-tech-cyan border border-tech-cyan/20 cursor-default">
+              <Shield className="w-5 h-5" /> 监管方人员
             </div>
           </div>
         </div>
@@ -28,44 +28,22 @@ export default function Profile() {
       {/* Menu List */}
       <div className="p-4 space-y-3">
         <div className="bg-[#111622] border border-[#1E293B] rounded-xl overflow-hidden shadow-sm">
-          <button className="w-full flex items-center justify-between p-4 bg-transparent border-b border-[#1E293B]/50 hover:bg-[#1E293B]/50 transition-colors active:bg-[#1E293B]">
-             <div className="flex items-center gap-3">
-               <div className="w-7 h-7 rounded bg-blue-500/20 flex items-center justify-center">
-                 <Bell className="w-4 h-4 text-blue-500" />
-               </div>
-               <span className="text-sm text-white font-medium">通知消息</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-               <ChevronRight className="w-4 h-4 text-[#64748B]" />
-             </div>
-          </button>
-          
-          <button className="w-full flex items-center justify-between p-4 bg-transparent border-b border-[#1E293B]/50 hover:bg-[#1E293B]/50 transition-colors active:bg-[#1E293B]">
-             <div className="flex items-center gap-3">
-               <div className="w-7 h-7 rounded bg-purple-500/20 flex items-center justify-center">
-                 <FileText className="w-4 h-4 text-purple-500" />
-               </div>
-               <span className="text-sm text-white font-medium">处理记录</span>
-             </div>
-             <ChevronRight className="w-4 h-4 text-[#64748B]" />
-          </button>
-          
+
           <button className="w-full flex items-center justify-between p-4 bg-transparent hover:bg-[#1E293B]/50 transition-colors active:bg-[#1E293B]">
              <div className="flex items-center gap-3">
                <div className="w-7 h-7 rounded bg-orange-500/20 flex items-center justify-center">
-                 <Lock className="w-4 h-4 text-orange-500" />
+                 <Lock className="w-5 h-5 text-orange-500" />
                </div>
-               <span className="text-sm text-white font-medium">修改密码</span>
+               <span className="text-base text-white font-medium">修改密码</span>
              </div>
-             <ChevronRight className="w-4 h-4 text-[#64748B]" />
+             <ChevronRight className="w-5 h-5 text-[#64748B]" />
           </button>
         </div>
 
         <div className="bg-[#111622] border border-[#1E293B] rounded-xl overflow-hidden shadow-sm mt-4">
           <button onClick={() => navigate('/h5/login')} className="w-full flex items-center justify-center p-4 bg-transparent hover:bg-red-500/10 text-red-500 transition-colors active:bg-red-500/20 gap-2">
-            <LogOut className="w-4 h-4" />
-            <span className="text-sm font-medium">退出登录</span>
+            <LogOut className="w-5 h-5" />
+            <span className="text-base font-medium">退出登录</span>
           </button>
         </div>
       </div>

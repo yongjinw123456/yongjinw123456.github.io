@@ -89,6 +89,7 @@ export default function WarningManagement() {
   const [activeEvent, setActiveEvent] = useState<WarningEvent | null>(null);
   
   const [processType, setProcessType] = useState<'解除' | '预警归因'>('预警归因');
+  const [isManualCreateOpen, setIsManualCreateOpen] = useState(false);
 
   const openProcessModal = (evt: WarningEvent) => {
     setActiveEvent(evt);
@@ -134,6 +135,13 @@ export default function WarningManagement() {
             RISK / WARNING MANAGEMENT
           </p>
         </div>
+        <button 
+          onClick={() => setIsManualCreateOpen(true)}
+          className="flex items-center gap-2 bg-tech-cyan hover:bg-tech-cyan/90 text-[#0B0F17] px-4 py-2 rounded-lg font-bold text-sm shadow-[0_0_15px_rgba(0,242,255,0.3)] transition-all"
+        >
+          <AlertTriangle className="w-4 h-4" />
+          <span>手动创建预警</span>
+        </button>
       </header>
 
       {/* Filter Section */}
@@ -370,6 +378,119 @@ export default function WarningManagement() {
                  <button onClick={() => setIsProcessModalOpen(false)} className="px-4 py-2 rounded text-sm font-bold bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)]">
                     {processType === '解除' ? '确认解除' : '提交归因'}
                  </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Manual Create Modal */}
+      <AnimatePresence>
+        {isManualCreateOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#0B0F17]/80 backdrop-blur-sm"
+              onClick={() => setIsManualCreateOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-[#111622] rounded-lg border border-[#1E293B] shadow-2xl flex flex-col"
+            >
+              <div className="p-4 border-b border-[#1E293B] flex items-center justify-between bg-[#0F172A] rounded-t-lg">
+                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                   <ShieldAlert className="w-4 h-4 text-tech-cyan" />
+                   手动创建预警记录
+                 </h3>
+                 <button onClick={() => setIsManualCreateOpen(false)} className="text-[#64748B] hover:text-white">
+                   <X className="w-5 h-5" />
+                 </button>
+              </div>
+                <div className="p-6 overflow-y-auto min-h-0 space-y-6">
+                 
+                 {/* 基础表单 */}
+                 <div className="space-y-4">
+                   <div className="space-y-1.5">
+                     <label className="text-xs font-bold text-[#94A3B8] uppercase tracking-widest">预警对象 (水库) <span className="text-red-500">*</span></label>
+                     <select className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-sm text-white outline-none appearance-none">
+                       <option value="">请选择水库</option>
+                       <option value="shanxi">珊溪水库</option>
+                       <option value="qiaodun">桥墩水库</option>
+                       <option value="zhaoshandu">赵山渡水库</option>
+                     </select>
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs font-bold text-[#94A3B8] uppercase tracking-widest">预警说明</label>
+                     <textarea className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-sm text-white outline-none resize-none h-20 placeholder:text-[#475569]" placeholder="请输入说明 (0-500字)" maxLength={500} />
+                   </div>
+                 </div>
+
+                 <div className="w-full h-px bg-[#1E293B]"></div>
+
+                 {/* 明细表单 */}
+                 <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                     <span className="text-xs font-bold text-white uppercase tracking-widest">预警记录明细</span>
+                     <button className="text-xs text-tech-cyan hover:underline transition-colors border border-tech-cyan/30 px-2 py-1 rounded bg-tech-cyan/10">
+                        + 新增记录
+                     </button>
+                   </div>
+                   
+                   {/* 单条明细卡片（示例只有一条） */}
+                   <div className="bg-[#0F172A] border border-[#1E293B] rounded p-4 relative group">
+                      <button className="absolute top-3 right-3 text-[#64748B] hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-4 h-4"/></button>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                           <label className="text-[10px] text-[#64748B]">预警时间 <span className="text-red-500">*</span></label>
+                           <input type="datetime-local" className="w-full bg-[#111622] border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white outline-none" />
+                        </div>
+                        <div className="space-y-1.5">
+                           <label className="text-[10px] text-[#64748B]">预警等级 <span className="text-red-500">*</span></label>
+                           <select className="w-full bg-[#111622] border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white outline-none">
+                              <option value="黄色预警">黄色预警</option>
+                              <option value="橙色预警">橙色预警</option>
+                              <option value="红色预警">红色预警</option>
+                           </select>
+                        </div>
+                        <div className="space-y-1.5 col-span-2">
+                           <label className="text-[10px] text-[#64748B]">阈值来源 <span className="text-red-500">*</span></label>
+                           <select className="w-full bg-[#111622] border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white outline-none">
+                              <option value="预警线">预警线</option>
+                              <option value="征地线">征地线</option>
+                              <option value="二级赔付线">二级赔付线</option>
+                              <option value="三级赔付线">三级赔付线</option>
+                              <option value="自定义阈值">自定义阈值</option>
+                           </select>
+                        </div>
+                        <div className="space-y-1.5">
+                           <label className="text-[10px] text-[#64748B]">当前水位线 (m) <span className="text-red-500">*</span></label>
+                           <input type="number" step="0.01" className="w-full bg-[#111622] border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white font-mono outline-none" />
+                        </div>
+                        <div className="space-y-1.5">
+                           <label className="text-[10px] text-[#64748B]">最高水位线 (m)</label>
+                           <input type="number" step="0.01" placeholder="默认同当前水位" className="w-full bg-[#111622] border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white font-mono outline-none placeholder:text-[#475569]" />
+                        </div>
+                        <div className="space-y-1.5 col-span-2">
+                           <label className="text-[10px] text-[#64748B]">明细说明</label>
+                           <textarea className="w-full bg-[#111622] border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white outline-none resize-none h-[40px] placeholder:text-[#475569]" placeholder="选填..." />
+                        </div>
+                      </div>
+                   </div>
+                 </div>
+
+              </div>
+              <div className="p-4 border-t border-[#1E293B] bg-[#0F172A] rounded-b-lg flex justify-between items-center sm:gap-3 shrink-0">
+                 <button onClick={() => setIsManualCreateOpen(false)} className="px-4 py-2 rounded text-sm font-medium text-[#94A3B8] border border-[#1E293B] hover:bg-[#1E293B] transition-colors">
+                    取消
+                 </button>
+                 <div className="flex items-center gap-3">
+                   <button onClick={() => setIsManualCreateOpen(false)} className="px-4 py-2 rounded text-sm font-medium text-white border border-[#1E293B] hover:bg-[#1E293B] transition-colors">
+                      保存草稿
+                   </button>
+                   <button onClick={() => setIsManualCreateOpen(false)} className="px-4 py-2 rounded text-sm font-bold bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)] whitespace-nowrap">
+                      生成预警事件
+                   </button>
+                 </div>
               </div>
             </motion.div>
           </div>

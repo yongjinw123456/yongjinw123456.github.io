@@ -199,15 +199,6 @@ export default function ClaimsRecords() {
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">水库确认状态</label>
-            <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white outline-none appearance-none cursor-pointer">
-              <option value="">全状态</option>
-              <option value="待确认">待确认</option>
-              <option value="已确认">已确认</option>
-              <option value="已驳回">已驳回</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
             <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">关联保单</label>
             <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white outline-none appearance-none cursor-pointer">
               <option value="">全部保单</option>
@@ -228,7 +219,6 @@ export default function ClaimsRecords() {
                 <th className="px-4 py-3 font-medium text-right bg-[#0F172A]/80 border-x border-[#1E293B]/50">总赔付金额(元)</th>
                 <th className="px-4 py-3 font-medium">理赔资料</th>
                 <th className="px-4 py-3 font-medium">理赔核算状态</th>
-                <th className="px-4 py-3 font-medium">水库确认状态</th>
                 <th className="px-4 py-3 font-medium">时间信息</th>
                 <th className="px-4 py-3 font-medium text-right sticky right-0 bg-[#0F172A]">操作</th>
               </tr>
@@ -266,11 +256,6 @@ export default function ClaimsRecords() {
                   <td className="px-4 py-3">
                     <span className={cn("px-2 py-0.5 rounded border text-[10px] whitespace-nowrap", getStatusColor(row.status))}>
                       {row.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={cn("px-2 py-0.5 rounded border text-[10px] whitespace-nowrap", getOwnerConfirmColor(row.ownerConfirmStatus))}>
-                      {row.ownerConfirmStatus}
                     </span>
                   </td>
                   <td className="px-4 py-3 font-mono">
@@ -373,9 +358,9 @@ export default function ClaimsRecords() {
                         </select>
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs text-[#94A3B8]">关联预警事件 <span className="text-red-500">*</span></label>
+                        <label className="text-xs text-[#94A3B8]">关联预警事件 <span className="text-[#64748B] text-[10px] ml-1">(选填)</span></label>
                         <select disabled={drawerMode === 'view'} defaultValue={activeRecord?.warningEventId || searchParams.get('warningEventId') || ''} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-orange-400 font-mono outline-none disabled:opacity-60">
-                           <option value="">请选择</option>
+                           <option value="">无关联(手动补录)</option>
                            <option value="EVT-001">EVT-001</option>
                            <option value="EVT-002">EVT-002</option>
                         </select>
@@ -390,78 +375,82 @@ export default function ClaimsRecords() {
                       理赔核算详情
                     </h4>
                     
-                    <div className="bg-[#111622] rounded-lg border border-[#1E293B] p-5 space-y-6">
-                       
-                       {/* 事故 */}
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-[#1E293B]">
-                         <div>
-                            <div className="text-[10px] text-[#64748B] mb-2 uppercase">事故财产损失</div>
-                            <div className="text-[10px] bg-[#0F172A] p-2 rounded font-mono text-[#94A3B8] border border-[#1E293B]">
-                               A = min(A1 + A2, L_a_once, L_a_year_remaining)
-                            </div>
-                            <div className="text-[10px] mt-2 grid grid-cols-2 gap-1 text-[#64748B]">
-                              <span>A1 (阶梯): <span className="text-white">{activeRecord?.accidentAmount !== undefined ? activeRecord.accidentAmount : 3000000}</span></span>
-                              <span>A2 (上浮): <span className="text-white">{activeRecord?.upfloatAmount !== undefined ? activeRecord.upfloatAmount : 2480000}</span></span>
-                              <span>L_a_once: 500w</span><span>L_a_yr: 1000w</span>
-                            </div>
-                         </div>
-                         <div className="bg-[#0F172A]/50 border border-[#1E293B] rounded p-3">
-                            <label className="text-xs text-[#94A3B8] mb-1.5 block">事故赔付金额 (元) <span className="text-red-500">*</span></label>
-                            <input type="number" disabled={drawerMode === 'view'} defaultValue={activeRecord?.accidentAmount !== undefined ? (activeRecord.accidentAmount + (activeRecord.upfloatAmount || 0)) : 5480000} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white font-mono outline-none disabled:opacity-60" />
-                            <label className="text-[10px] text-[#94A3B8] mt-3 mb-1.5 block">事故赔付调整说明</label>
-                            <textarea disabled={drawerMode === 'view'} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white outline-none resize-none h-[40px] disabled:opacity-60" placeholder="若调整请填写..." />
-                         </div>
+                    <div className="bg-[#1A2035] rounded-xl border border-[#2A344A] p-6 flex flex-col relative overflow-hidden space-y-6">
+                       <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                         <Calculator className="w-32 h-32" />
                        </div>
+                       <div className="space-y-4 text-sm relative z-10">
+                          {/* 基础赔付 */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#94A3B8]">基础赔付金额</span>
+                            <div className="flex items-center gap-3">
+                               <input 
+                                 type="number" 
+                                 disabled={drawerMode === 'view'} 
+                                 defaultValue={activeRecord?.accidentAmount !== undefined ? activeRecord.accidentAmount : 5480000} 
+                                 className="w-32 bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1 text-right text-white font-mono outline-none disabled:opacity-60 transition-colors" 
+                               />
+                            </div>
+                          </div>
 
-                       {/* 分项 */}
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-[#1E293B]">
-                         <div>
-                            <div className="text-[10px] text-[#64748B] mb-2 uppercase">转移安置</div>
-                            <div className="text-[10px] bg-[#0F172A] p-2 rounded font-mono text-[#94A3B8] border border-[#1E293B]">
-                               R = min(N_r × P_r, L_r_once, L_r_year_remaining)
-                            </div>
-                            <div className="text-[10px] mt-2 grid grid-cols-2 gap-1 text-[#64748B]">
-                              <span>N_r: <input type="number" disabled={drawerMode==='view'} defaultValue={0} className="w-12 bg-transparent border-b border-[#334155] text-white"/> 人</span>
-                              <span>P_r: 200</span>
-                              <span>L_r_once: 50w</span><span>L_r_yr: 150w</span>
-                            </div>
-                         </div>
-                         <div className="bg-[#0F172A]/50 border border-[#1E293B] rounded p-3 flex flex-col justify-center">
-                            <label className="text-xs text-[#94A3B8] mb-1.5 block">转移安置金额 (元)</label>
-                            <input type="number" disabled defaultValue={activeRecord?.relocationAmount || 0} className="w-full bg-[#111622]/50 border border-[#1E293B] rounded px-2 py-1.5 text-xs text-white font-mono outline-none disabled:opacity-80" />
-                         </div>
+                          <div className="h-px bg-[#2A344A]/50 w-full" />
 
-                         <div>
-                            <div className="text-[10px] text-[#64748B] mb-2 uppercase">人身伤亡</div>
-                            <div className="text-[10px] bg-[#0F172A] p-2 rounded font-mono text-[#94A3B8] border border-[#1E293B]">
-                               C = min(N_c × P_c, L_c_year_remaining)
+                          {/* 转移安置 */}
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                               <span className="text-[#94A3B8]">转移安置人数</span>
+                               <div className="flex items-center bg-[#0F172A] border border-[#1E293B] focus-within:border-tech-cyan rounded px-2 py-1 transition-colors">
+                                 <input title="转移安置人数" type="number" disabled={drawerMode==='view'} defaultValue={0} className="w-12 bg-transparent text-white text-xs text-center outline-none disabled:opacity-60"/>
+                                 <span className="text-[#64748B] text-xs">人</span>
+                               </div>
                             </div>
-                            <div className="text-[10px] mt-2 grid grid-cols-2 gap-1 text-[#64748B]">
-                              <span>N_c: <input type="number" disabled={drawerMode==='view'} defaultValue={0} className="w-12 bg-transparent border-b border-[#334155] text-white"/> 人</span>
-                              <span>P_c: 15w</span>
-                              <span>L_c_yr: 300w</span>
+                            <div className="flex items-center gap-3">
+                               <span className="text-[#64748B] text-xs">转移安置金额:</span>
+                               <input 
+                                 type="number" 
+                                 disabled={drawerMode === 'view'} 
+                                 defaultValue={activeRecord?.relocationAmount || 0} 
+                                 className="w-32 bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1 text-right text-white font-mono outline-none disabled:opacity-60 transition-colors" 
+                               />
                             </div>
-                         </div>
-                         <div className="bg-[#0F172A]/50 border border-[#1E293B] rounded p-3">
-                            <label className="text-xs text-[#94A3B8] mb-1.5 block">人身伤亡金额 (元)</label>
-                            <input type="number" disabled={drawerMode === 'view'} defaultValue={activeRecord?.injuryAmount || 0} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white font-mono outline-none disabled:opacity-60" />
-                            <label className="text-[10px] text-[#94A3B8] mt-3 mb-1.5 block">人伤调整说明</label>
-                            <textarea disabled={drawerMode === 'view'} className="w-full bg-[#111622] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1.5 text-xs text-white outline-none resize-none h-[40px] disabled:opacity-60" placeholder="若调整请填写..." />
-                         </div>
+                          </div>
+
+                          <div className="h-px bg-[#2A344A]/50 w-full" />
+
+                          {/* 人身伤亡 */}
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                               <span className="text-[#94A3B8]">人身伤亡人数</span>
+                               <div className="flex items-center bg-[#0F172A] border border-[#1E293B] focus-within:border-tech-cyan rounded px-2 py-1 transition-colors">
+                                 <input title="人身伤亡人数" type="number" disabled={drawerMode==='view'} defaultValue={0} className="w-12 bg-transparent text-white text-xs text-center outline-none disabled:opacity-60"/>
+                                 <span className="text-[#64748B] text-xs">人</span>
+                               </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                               <span className="text-[#64748B] text-xs">人身伤亡赔付金额:</span>
+                               <input 
+                                 type="number" 
+                                 disabled={drawerMode === 'view'} 
+                                 defaultValue={activeRecord?.injuryAmount || 0} 
+                                 className="w-32 bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1 text-right text-white font-mono outline-none disabled:opacity-60 transition-colors" 
+                               />
+                            </div>
+                          </div>
                        </div>
 
                        {/* 汇总 */}
-                       <div className="bg-[#1E293B]/30 border border-[#334155] rounded p-4 flex items-center justify-between">
-                         <div className="space-y-1">
-                            <div className="text-[10px] text-[#94A3B8] uppercase">最终总赔付金额 (元)</div>
-                            <div className="text-xs text-[#64748B] font-mono">T_final = min(A + R + C, L_total_year_remaining)</div>
-                            <div className="text-[10px] text-green-400 font-mono">剩余保单额度: 25,000,000</div>
-                         </div>
-                         <div className="text-2xl font-mono text-tech-cyan drop-shadow-[0_0_10px_rgba(0,242,255,0.4)]">
-                            {activeRecord ? activeRecord.totalAmount : 5480000}
-                         </div>
+                       <div className="mt-4 pt-6 border-t border-[#2A344A] flex items-end justify-between relative z-10">
+                          <div className="space-y-1.5">
+                             <span className="text-sm font-bold text-white block">总计预计赔付</span>
+                             <span className="text-[10px] text-[#64748B] font-mono">保单防洪剩余额度: 25,000,000</span>
+                          </div>
+                          <div className="relative group">
+                            <div className="absolute inset-0 bg-tech-cyan/20 blur-[15px] rounded-lg group-hover:bg-tech-cyan/30 transition-all"></div>
+                            <span className="relative text-3xl font-mono text-tech-cyan font-bold tracking-tight px-2 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+                              ¥{activeRecord ? activeRecord.totalAmount.toLocaleString() : '5,480,000'}
+                            </span>
+                          </div>
                        </div>
-
                     </div>
                  </section>
 

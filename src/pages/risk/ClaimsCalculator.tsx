@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Calculator, ArrowRight, Save, Info, AlertTriangle, Play } from 'lucide-react';
+import { Calculator, ArrowRight, Save, Info, AlertTriangle, Play, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -18,66 +18,75 @@ export default function ClaimsCalculator() {
   const [warningEventId, setWarningEventId] = useState(initialWarningEventId);
 
   // Manual inputs for calculation
-  const [peopleRelocated, setPeopleRelocated] = useState<number>(0);
-  const [peopleInjured, setPeopleInjured] = useState<number>(0);
-  const [injuredAmountManual, setInjuredAmountManual] = useState<number | ''>('');
-  const [injuredAdjustmentDesc, setInjuredAdjustmentDesc] = useState('');
+  // (Moved below)
   
   // Computed values mock based on warning level (in a real app, from backend)
-  const isCalculated = !!warningEventId && !!reservoirId;
 
-  // Constants (mocked from "snapshot")
-  const H_max = 145.00; // 最高水位
-  const s_j = 144.04; // 阶梯起始水位
-  const e_j = 147.71; // 阶梯结束水位
-  const F_j = 2000000; // 固定赔付金额
-  const P_j = 30000; // 超出水位单价 (元/0.01米)
-  const M_j = 13000000; // 区间累计赔付上限
+  // Left side state
+  const [waterLevel, setWaterLevel] = useState<number>(145.00);
+  const [totalDuration, setTotalDuration] = useState<number>(2);
+  const [stepDurations, setStepDurations] = useState<{ id: string; name: string; range: string; duration: number }[]>([
+    { id: '1', name: '阶梯1', range: '144.04 - 147.71', duration: 24 }
+  ]);
+  const [peopleRelocated, setPeopleRelocated] = useState<number>(0);
+  const [peopleInjured, setPeopleInjured] = useState<number>(0);
+  const [injuryAmountManual, setInjuryAmountManual] = useState<number>(0);
 
-  const deductiblePerAccident = 100000; // 绝对免赔额
-  
-  const N_r = peopleRelocated;
-  const P_r = 200; // 转移安置每人每次
-  const L_r_once = 500000; // 转移安置单次限额
-  const L_r_year_remaining = 1500000; // 转移安置年累计剩余
-  
-  const N_c = peopleInjured;
-  const P_c = 150000; // 人伤每人每次
-  const L_c_year_remaining = 3000000; // 人伤年累计剩余
+  // Readonly params for steps
+  const hitStep = "阶梯1";
+  const s_j = 144.04;
+  const e_j = 147.71;
+  const F_j = 2000000;
+  const P_j = 30000;
+  const P_r = 200;
 
-  const L_total_year_remaining = 25000000; // 保单总剩余额度
+  // Limits
+  const M_j = 13000000; // 阶梯累计赔付上限, not explicitly required but implied
+  const L_total_limit = 30000000; // 总限额
+  const L_total_used = 5000000; // 已使用总额度
+  const L_total_year_remaining = L_total_limit - L_total_used;
   
+  const L_r_limit = 5000000; // 转移限额
+  const L_r_used = 1000000; // 转移已使用
+  const L_r_year_remaining = L_r_limit - L_r_used;
+
+  const L_c_limit = 8000000; // 人伤限额
+  const L_c_used = 0; // 人伤已使用
+  const L_c_year_remaining = L_c_limit - L_c_used;
+
   // Calculate Base
-  const N_j = Math.max(0, Math.floor((H_max - s_j) / 0.01));
-  const A_base = Math.min(F_j + N_j * P_j, M_j);
+  const N_j = Math.max(0, Math.floor((waterLevel - s_j) / 0.01));
+  const waterLevelIncrement = N_j * P_j;
+  const A_base = waterLevel < s_j ? 0 : F_j + waterLevelIncrement;
   
-  // Deductible
-  const A_deducted = Math.max(A_base - deductiblePerAccident, 0);
-
-  // Upfloat (上浮)
-  const isUpfloatTriggered = true;
-  const d_days = 2; // 淹没天数
-  const k_factor = 1.1; // 赔付系数 110%
-  const U = A_deducted * (k_factor - 1);
-  const A = A_deducted + U;
-
   // Relocation
-  const R = Math.min(N_r * P_r, L_r_once, L_r_year_remaining);
+  const R = peopleRelocated * P_r;
   
   // Injury
-  const calculated_C = Math.min(N_c * P_c, L_c_year_remaining);
-  const C = injuredAmountManual !== '' ? Number(injuredAmountManual) : calculated_C;
+  const C = injuryAmountManual;
 
   // Total
-  const T_raw = A + R + C;
+  const T_raw = A_base + R + C;
   const T_final = Math.min(T_raw, L_total_year_remaining);
+
+  const addStepDuration = () => {
+    setStepDurations([...stepDurations, { id: Date.now().toString(), name: '', range: '', duration: 0 }]);
+  };
+
+  const updateStepDuration = (id: string, field: string, value: any) => {
+    setStepDurations(stepDurations.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
+  const removeStepDuration = (id: string) => {
+    setStepDurations(stepDurations.filter(s => s.id !== id));
+  };
 
   const handleGenerateDraft = () => {
     // Navigate to records and trigger create modal
     navigate(`/risk/claims/records?action=create&warningEventId=${warningEventId}&reservoirId=${reservoirId}`, {
       state: {
-        accidentAmountManual: A,
-        upfloatAmount: U,
+        accidentAmountManual: A_base,
+        upfloatAmount: 0,
         relocationAmountManual: R,
         injuryAmountManual: C,
         totalAmountManual: T_final
@@ -100,205 +109,247 @@ export default function ClaimsCalculator() {
       </header>
 
       <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-4">
-        {/* 参数区 */}
-        <div className="bg-[#111622] border border-[#1E293B] rounded-lg p-5 shrink-0">
-          <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-            <Calculator className="w-4 h-4 text-tech-cyan" />
-            输入参数
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-             <div className="space-y-1.5">
-               <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">理赔对象 <span className="text-red-500">*</span></label>
-               <select value={reservoirId} onChange={e => setReservoirId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none">
-                 <option value="">请选择水库</option>
-                 <option value="shanxi">珊溪水库</option>
-                 <option value="qiaodun">桥墩水库</option>
-                 <option value="zhaoshandu">赵山渡水库</option>
-               </select>
-             </div>
-             <div className="space-y-1.5">
-               <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">理赔类型 <span className="text-red-500">*</span></label>
-               <select value={claimType} onChange={e => setClaimType(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none">
-                 <option value="防洪">防洪</option>
-               </select>
-             </div>
-             <div className="space-y-1.5">
-               <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">关联保单 <span className="text-red-500">*</span></label>
-               <select value={policyId} onChange={e => setPolicyId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-tech-cyan outline-none font-mono">
-                 <option value="POL-20240510-001">POL-20240510-001 (保障中)</option>
-               </select>
-             </div>
-             <div className="space-y-1.5">
-               <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">关联预警事件 <span className="text-red-500">*</span></label>
-               <select value={warningEventId} onChange={e => setWarningEventId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-orange-400 outline-none font-mono">
-                 <option value="">请选择预警事件</option>
-                 <option value="EVT-001">EVT-001 (当前最高: 145.00m)</option>
-               </select>
-             </div>
-             
-             {isCalculated && (
-               <>
-                 <div className="space-y-1.5">
-                   <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">转移安置人数 <span className="text-[#94A3B8] font-normal">(选填)</span></label>
-                   <input type="number" min="0" value={peopleRelocated} onChange={e => setPeopleRelocated(Number(e.target.value))} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none font-mono" />
-                 </div>
-                 <div className="space-y-1.5">
-                   <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">人身伤亡人数 <span className="text-[#94A3B8] font-normal">(选填)</span></label>
-                   <input type="number" min="0" value={peopleInjured} onChange={e => setPeopleInjured(Number(e.target.value))} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none font-mono" />
-                 </div>
-                 <div className="space-y-1.5 col-span-2">
-                   <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">人伤赔付金额人工调整 <span className="text-[#94A3B8] font-normal">(选填)</span></label>
-                   <div className="flex gap-2">
-                     <input type="number" min="0" placeholder="默认系统计算" value={injuredAmountManual} onChange={e => setInjuredAmountManual(e.target.value ? Number(e.target.value) : '')} className="flex-1 bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none font-mono placeholder:text-[#475569]" />
-                     <input type="text" placeholder="调整说明(必填)" value={injuredAdjustmentDesc} onChange={e => setInjuredAdjustmentDesc(e.target.value)} className="flex-[2] bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none placeholder:text-[#475569]" disabled={injuredAmountManual === ''} />
-                   </div>
-                 </div>
-               </>
-             )}
-          </div>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
+          {/* Left: Input Params */}
+          <div className="space-y-6">
+              {/* 预警与水位参数 */}
+              <div className="bg-[#1A2035] rounded-xl border border-[#2A344A] p-6 space-y-5 shadow-lg">
+                <h4 className="text-sm font-bold text-white border-b border-[#2A344A] pb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-tech-cyan rounded-sm"></span>预警与水位参数
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">理赔对象</label>
+                    <select value={reservoirId} onChange={e => setReservoirId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none">
+                      <option value="shanxi">珊溪水库</option>
+                      <option value="qiaodun">桥墩水库</option>
+                      <option value="zhaoshandu">赵山渡水库</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">关联保单</label>
+                    <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-tech-cyan font-mono outline-none appearance-none focus:border-tech-cyan transition-colors">
+                      <option value="POL-20240510-001">POL-20240510-001 (保障中)</option>
+                      <option value="POL-20230510-002">POL-20230510-002 (保障中)</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5 col-span-2">
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">关联预警事件 <span className="text-[#64748B] font-normal lowercase">(Optional)</span></label>
+                    <select value={warningEventId} onChange={e => setWarningEventId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-orange-400 font-mono outline-none">
+                      <option value="">手工录入(无关联预警)</option>
+                      <option value="EVT-001">EVT-001</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">最高水位 H_max (米)</label>
+                    <input type="number" step="0.01" value={waterLevel} onChange={e => setWaterLevel(Number(e.target.value))} className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-xs text-white font-mono outline-none transition-colors" />
+                  </div>
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">总淹没时长 (小时)</label>
+                    <input type="number" step="0.1" value={totalDuration} onChange={e => setTotalDuration(Number(e.target.value))} className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-xs text-white font-mono outline-none transition-colors" />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
+                      <label className="text-[#94A3B8]">各阶梯区间淹没时长 <span className="text-[#64748B] normal-case tracking-normal">(选填记录用，不参与计算)</span></label>
+                      <button onClick={addStepDuration} className="text-tech-cyan hover:underline hover:text-white transition-colors">+ 添加记录</button>
+                    </div>
+                    {stepDurations.map((step, idx) => (
+                      <div key={step.id} className="flex gap-2 items-center bg-[#0F172A] p-2 rounded border border-[#1E293B]">
+                        <input type="text" placeholder="阶梯名称" value={step.name} onChange={e => updateStepDuration(step.id, 'name', e.target.value)} className="flex-1 min-w-[70px] bg-transparent border-b border-[#334155] text-xs text-white outline-none px-1 py-0.5" />
+                        <input type="text" placeholder="起止水位(144-145)" value={step.range} onChange={e => updateStepDuration(step.id, 'range', e.target.value)} className="flex-[1.5] min-w-[100px] bg-transparent border-b border-[#334155] text-xs text-white outline-none px-1 py-0.5" />
+                        <div className="flex items-center gap-1 border-b border-[#334155]">
+                          <input type="number" placeholder="0" value={step.duration} onChange={e => updateStepDuration(step.id, 'duration', Number(e.target.value))} className="w-16 bg-transparent text-xs text-white outline-none px-1 py-0.5 font-mono text-right" />
+                          <span className="text-[10px] text-[#64748B]">时</span>
+                        </div>
+                        <button onClick={() => removeStepDuration(step.id)} className="text-[#64748B] hover:text-red-400 p-1"><X className="w-3 h-3" /></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-        {/* 计算结果与公式展示 */}
-        {isCalculated ? (
-          <div className="bg-[#111622] border border-[#1E293B] rounded-lg p-5 flex flex-col gap-6">
-             <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                  <Play className="w-4 h-4 text-tech-cyan" />
-                  计算结果与公式
-                </h3>
-             </div>
+              {/* 基础赔付参数 */}
+              <div className="bg-[#1A2035] rounded-xl border border-[#2A344A] p-6 space-y-4 shadow-lg">
+                <h4 className="text-sm font-bold text-white border-b border-[#2A344A] pb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-blue-500 rounded-sm"></span>基础赔付参数 <span className="text-[10px] font-normal text-[#64748B] ml-2">(保单读取快照)</span>
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+                  <div className="space-y-1">
+                    <span className="text-[#64748B] block">命中阶梯</span>
+                    <span className="text-white bg-[#0F172A] px-2 py-1 rounded inline-block border border-[#1E293B]">{hitStep}</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[#64748B] block">阶梯起始水位 s_j (m)</span>
+                    <span className="font-mono text-white block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">{s_j.toFixed(2)}</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[#64748B] block">阶梯结束水位 e_j (m)</span>
+                    <span className="font-mono text-white block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">{e_j.toFixed(2)}</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[#64748B] block">固定赔付金额 F_j (元)</span>
+                    <span className="font-mono text-blue-400 block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">¥{F_j.toLocaleString()}</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[#64748B] block">超出水位单价 P_j</span>
+                    <span className="font-mono text-white block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">¥{P_j.toLocaleString()}/0.01m</span>
+                  </div>
+                </div>
+              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 转移安置与人伤参数 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-[#1A2035] rounded-xl border border-[#2A344A] p-6 space-y-4 shadow-lg shrink-0">
+                  <h4 className="text-sm font-bold text-white border-b border-[#2A344A] pb-3 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-orange-500 rounded-sm"></span>转移安置参数
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-[#94A3B8] block">转移安置人数 N_r</label>
+                      <input type="number" min="0" value={peopleRelocated} onChange={e => setPeopleRelocated(Number(e.target.value))} className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-sm text-white outline-none font-mono transition-colors" />
+                    </div>
+                    <div className="flex justify-between items-center bg-[#0F172A] border border-[#1E293B] px-3 py-2 rounded">
+                       <span className="text-xs text-[#64748B]">转移安置费 P_r / 人</span>
+                       <span className="text-xs font-mono text-white">¥{P_r}</span>
+                    </div>
+                  </div>
+                </div>
                 
-                {/* 事故赔付 */}
-                <div className="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-4">
-                   <h4 className="text-[11px] text-tech-cyan font-bold border-b border-[#1E293B] pb-2 flex justify-between">
-                     <span>事故赔付公式</span>
-                     <span className="font-mono text-white text-sm">{(A_base / 10000).toFixed(2)} 万</span>
-                   </h4>
-                   <div className="text-[10px] text-[#94A3B8] font-mono bg-[#0B0F17] p-2 rounded border border-[#1E293B]/50 leading-relaxed">
-                     A_base = min(F_j + floor((H_max - s_j) / 0.01) × P_j, M_j)<br/>
-                     <span className="text-tech-cyan">
-                       A_base = min({(F_j/10000).toFixed(0)}万 + floor(({H_max.toFixed(2)} - {s_j.toFixed(2)}) / 0.01) × {(P_j/10000).toFixed(1)}万, {(M_j/10000).toFixed(0)}万)
-                     </span>
+                <div className="bg-[#1A2035] rounded-xl border border-[#2A344A] p-6 space-y-4 shadow-lg shrink-0">
+                  <h4 className="text-sm font-bold text-white border-b border-[#2A344A] pb-3 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-red-500 rounded-sm"></span>人身伤亡参数
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-[#94A3B8] block">人身伤亡人数 N_c</label>
+                      <input type="number" min="0" value={peopleInjured} onChange={e => setPeopleInjured(Number(e.target.value))} className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-sm text-white outline-none font-mono transition-colors" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-[#94A3B8] block">人身伤亡总赔付额 C</label>
+                      <input type="number" min="0" value={injuryAmountManual || ''} onChange={e => setInjuryAmountManual(Number(e.target.value))} placeholder="请输入金额" className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-2 text-sm text-white outline-none font-mono transition-colors" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Results Cards */}
+            <div className="space-y-6 flex flex-col relative">
+               <div className="absolute top-10 right-10 opacity-[0.03] pointer-events-none z-0">
+                 <Calculator className="w-96 h-96" />
+               </div>
+
+               {/* 基础赔付结果卡 */}
+               <div className="bg-[#1A2035]/80 backdrop-blur-md rounded-xl border border-[#2A344A] shadow-[0_4px_20px_rgba(0,0,0,0.4)] overflow-hidden relative z-10 transition-all hover:border-blue-500/30 group">
+                 <div className="h-1 w-full bg-gradient-to-r from-blue-500 to-transparent"></div>
+                 <div className="p-5">
+                   <h4 className="text-sm font-bold text-white mb-4 textShadow">基础赔付分析</h4>
+                   <div className="flex justify-between items-baseline mb-4">
+                     <span className="text-[#94A3B8] text-xs">基础赔付金额 (A_base)</span>
+                     <span className="text-2xl font-mono text-blue-400 font-bold tracking-tight">¥{A_base.toLocaleString()}</span>
                    </div>
-                   <div className="grid grid-cols-2 gap-2 text-[10px]">
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">H_max (最高水位)</span><span className="text-white font-mono">{H_max.toFixed(2)}m</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">s_j (阶梯起始)</span><span className="text-white font-mono">{s_j.toFixed(2)}m</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">F_j (固定赔付)</span><span className="text-white font-mono">{(F_j/10000).toFixed(0)}万</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">P_j (水位单价)</span><span className="text-white font-mono">{(P_j/10000).toFixed(1)}万</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">M_j (阶梯上限)</span><span className="text-white font-mono">{(M_j/10000).toFixed(0)}万</span></div>
+                   <div className="text-[10px] font-mono text-[#64748B] bg-[#0F172A] p-2 rounded border border-[#1E293B] leading-relaxed mb-4">
+                     公式: A_base = F_j + floor((H_max - s_j) / 0.01) × P_j<br/>
+                     计算: ¥{F_j.toLocaleString()} + {N_j} × ¥{P_j.toLocaleString()}
                    </div>
-                   <div className="mt-2 text-[10px] font-mono">
-                     <div className="flex justify-between text-[#94A3B8] pt-1">
-                        <span>免赔额扣减 = max(A_base - 绝对免赔额, 0)</span>
-                        <span className="text-white text-xs">{(A_deducted/10000).toFixed(2)} 万</span>
+                   <div className="flex justify-between items-center text-xs border-t border-[#2A344A] pt-4">
+                     <span className="text-[#64748B]">阶梯总赔付限额 M_j</span>
+                     <span className="font-mono text-white">¥{M_j.toLocaleString()}</span>
+                   </div>
+                 </div>
+               </div>
+
+               {/* 分项结果卡组 */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                 {/* 转移安置 */}
+                 <div className="bg-[#1A2035]/80 backdrop-blur-md rounded-xl border border-[#2A344A] shadow-[0_4px_20px_rgba(0,0,0,0.4)] p-5 hover:border-orange-500/30 transition-all">
+                   <div className="flex justify-between items-center mb-4">
+                     <h4 className="text-sm font-bold text-white">转移安置费</h4>
+                     <span className="text-lg font-mono text-orange-400 font-bold">¥{R.toLocaleString()}</span>
+                   </div>
+                   <div className="space-y-2 text-xs border-t border-[#2A344A] pt-3">
+                     <div className="flex justify-between items-center">
+                       <span className="text-[#64748B]">转移安置分项限额</span>
+                       <span className="font-mono text-white">¥{L_r_limit.toLocaleString()}</span>
+                     </div>
+                     <div className="flex justify-between items-center">
+                       <span className="text-[#64748B]">剩余转移安置额度</span>
+                       <span className="font-mono text-white">¥{L_r_year_remaining.toLocaleString()}</span>
                      </div>
                    </div>
-                </div>
+                 </div>
 
-                {/* 上浮金额 */}
-                <div className="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-4">
-                   <h4 className="text-[11px] text-tech-cyan font-bold border-b border-[#1E293B] pb-2 flex justify-between">
-                     <span>上浮公式</span>
-                     <span className="font-mono text-white text-sm">{(A / 10000).toFixed(2)} 万</span>
-                   </h4>
-                   <div className="text-[10px] text-[#94A3B8] font-mono bg-[#0B0F17] p-2 rounded border border-[#1E293B]/50 leading-relaxed">
-                     A = A_deducted × k(d)<br/>
-                     <span className="text-tech-cyan">
-                       A = {(A_deducted/10000).toFixed(2)}万 × {k_factor * 100}%
-                     </span>
+                 {/* 人身伤亡 */}
+                 <div className="bg-[#1A2035]/80 backdrop-blur-md rounded-xl border border-[#2A344A] shadow-[0_4px_20px_rgba(0,0,0,0.4)] p-5 hover:border-red-500/30 transition-all">
+                   <div className="flex justify-between items-center mb-4">
+                     <h4 className="text-sm font-bold text-white">人身伤亡赔付</h4>
+                     <span className="text-lg font-mono text-red-400 font-bold">¥{C.toLocaleString()}</span>
                    </div>
-                   <div className="grid grid-cols-2 gap-2 text-[10px]">
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">触发上浮灾害</span><span className="text-orange-400">台风</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">d (淹没时长)</span><span className="text-white font-mono">{d_days}天</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">k (赔付系数)</span><span className="text-orange-400 font-mono">{k_factor*100}%</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">U (上浮增量)</span><span className="text-white font-mono">{(U/10000).toFixed(2)}万</span></div>
+                   <div className="space-y-2 text-xs border-t border-[#2A344A] pt-3">
+                     <div className="flex justify-between items-center">
+                       <span className="text-[#64748B]">人身伤亡分项限额</span>
+                       <span className="font-mono text-white">¥{L_c_limit.toLocaleString()}</span>
+                     </div>
+                     <div className="flex justify-between items-center">
+                       <span className="text-[#64748B]">剩余人身伤亡额度</span>
+                       <span className="font-mono text-white">¥{L_c_year_remaining.toLocaleString()}</span>
+                     </div>
                    </div>
-                </div>
+                 </div>
+               </div>
 
-                {/* 分项 - 转移安置 */}
-                <div className="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-4">
-                   <h4 className="text-[11px] text-tech-cyan font-bold border-b border-[#1E293B] pb-2 flex justify-between">
-                     <span>转移安置公式</span>
-                     <span className="font-mono text-white text-sm">{(R / 10000).toFixed(2)} 万</span>
+               {/* 总赔付结果卡 */}
+               <div className="bg-gradient-to-br from-[#12192B] to-[#0A0E17] rounded-xl border border-tech-cyan/30 shadow-[0_0_30px_rgba(0,242,255,0.05)] relative z-10 overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-tech-cyan via-blue-500 to-purple-500"></div>
+                 <div className="p-6">
+                   <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-2">
+                     <Play className="w-4 h-4 text-tech-cyan" /> 最终核算结论
                    </h4>
-                   <div className="text-[10px] text-[#94A3B8] font-mono bg-[#0B0F17] p-2 rounded border border-[#1E293B]/50 leading-relaxed">
-                     R = min(N_r × P_r, L_r_once, L_r_year_remaining)<br/>
-                     <span className="text-tech-cyan">
-                       R = min({N_r} × {P_r}, {L_r_once}, {L_r_year_remaining})
-                     </span>
+                   <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="bg-[#0F172A] p-4 rounded-lg border border-[#1E293B]">
+                        <span className="text-xs text-[#64748B] block mb-1">原始汇总值 (T_raw)</span>
+                        <span className="text-xl font-mono text-white">¥{T_raw.toLocaleString()}</span>
+                      </div>
+                      <div className="bg-[#0F172A] p-4 rounded-lg border border-[#1E293B]">
+                        <span className="text-xs text-[#64748B] block mb-1">保单剩余总额度</span>
+                        <span className="text-xl font-mono text-green-400">¥{L_total_year_remaining.toLocaleString()}</span>
+                      </div>
                    </div>
-                   <div className="grid grid-cols-2 gap-2 text-[10px]">
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">N_r (转移人数)</span><span className="text-white font-mono">{N_r}人</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">P_r (每次金额)</span><span className="text-white font-mono">{P_r}元</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">L_r_once (单次限额)</span><span className="text-white font-mono">{(L_r_once/10000).toFixed(0)}万</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">L_r_yr_rem (累计剩余)</span><span className="text-blue-400 font-mono">{(L_r_year_remaining/10000).toFixed(0)}万</span></div>
+                   
+                   <div className="flex flex-col items-end pt-4 border-t border-[#2A344A]">
+                      <span className="text-xs text-[#94A3B8] mb-1">最终总赔付金额 (T_final)</span>
+                      <span className="text-5xl font-mono text-tech-cyan font-bold tracking-tighter drop-shadow-[0_0_15px_rgba(0,242,255,0.4)]">
+                        ¥{T_final.toLocaleString()}
+                      </span>
+                      {T_raw > L_total_year_remaining && (
+                        <span className="text-[10px] text-red-400 mt-2 flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" /> 超出保单剩余额度，已按剩余额度截断
+                        </span>
+                      )}
                    </div>
-                   {N_r * P_r > L_r_once && <div className="text-[9px] text-orange-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> 分项单次限额截断</div>}
-                </div>
+                 </div>
+                 <div className="bg-[#0F172A]/50 px-6 py-3 border-t border-[#2A344A] text-[10px] text-[#64748B] flex justify-between">
+                   <span>保单总限额: ¥{L_total_limit.toLocaleString()}</span>
+                   <span>已使用额度: ¥{L_total_used.toLocaleString()}</span>
+                 </div>
+               </div>
 
-                {/* 分项 - 人身伤亡 */}
-                <div className="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-4">
-                   <h4 className="text-[11px] text-tech-cyan font-bold border-b border-[#1E293B] pb-2 flex justify-between">
-                     <span>人身伤亡公式</span>
-                     <span className="font-mono text-white text-sm">{(C / 10000).toFixed(2)} 万</span>
-                   </h4>
-                   <div className="text-[10px] text-[#94A3B8] font-mono bg-[#0B0F17] p-2 rounded border border-[#1E293B]/50 leading-relaxed">
-                     {injuredAmountManual !== '' ? (
-                        <>
-                           C = Manual Override<br/>
-                           <span className="text-orange-400">手工调整生效</span>
-                        </>
-                     ) : (
-                        <>
-                           C = min(N_c × P_c, L_c_year_remaining)<br/>
-                           <span className="text-tech-cyan">
-                             C = min({N_c} × {(P_c/10000).toFixed(0)}万, {(L_c_year_remaining/10000).toFixed(0)}万)
-                           </span>
-                        </>
-                     )}
-                   </div>
-                   <div className="grid grid-cols-2 gap-2 text-[10px]">
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">N_c (伤亡人数)</span><span className="text-white font-mono">{N_c}人</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">P_c (每次金额)</span><span className="text-white font-mono">{(P_c/10000).toFixed(0)}万</span></div>
-                     <div className="flex justify-between border-b border-[#1E293B] pb-1"><span className="text-[#64748B]">L_c_yr_rem (累计剩余)</span><span className="text-blue-400 font-mono">{(L_c_year_remaining/10000).toFixed(0)}万</span></div>
-                   </div>
-                   {N_c * P_c > L_c_year_remaining && injuredAmountManual === '' && <div className="text-[9px] text-orange-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> 分项年额度截断</div>}
-                </div>
+               {/* 计算说明 */}
+               <div className="bg-[#1A2035]/50 border border-[#2A344A] p-4 rounded-xl relative z-10 text-xs">
+                 <h5 className="font-bold text-[#94A3B8] mb-2">计算规则说明</h5>
+                 <ul className="list-disc list-inside text-[#64748B] space-y-1.5 leading-relaxed">
+                   <li>最终赔付金额 <code className="bg-[#0F172A] px-1 rounded">T_final = min(A_base + R + C, 保单剩余总额度)</code>。</li>
+                 </ul>
+               </div>
 
-                {/* 总赔付公式 */}
-                <div className="bg-[#1E293B]/50 border border-tech-cyan/30 rounded p-4 space-y-4 col-span-1 lg:col-span-2 shadow-[0_0_15px_rgba(0,242,255,0.05)]">
-                   <h4 className="text-[12px] text-tech-cyan font-bold border-b border-tech-cyan/20 pb-2 flex justify-between">
-                     <span>总赔付公式</span>
-                     <span className="font-mono text-tech-cyan text-lg">{(T_final / 10000).toFixed(2)} 万</span>
-                   </h4>
-                   <div className="text-[11px] text-[#94A3B8] font-mono bg-[#0B0F17] p-2.5 rounded border border-[#1E293B] leading-relaxed">
-                     T_raw = A + R + C <span className="float-right">T_raw = {(T_raw/10000).toFixed(2)}万</span><br/>
-                     T_final = min(T_raw, L_total_year_remaining)<br/>
-                     <span className="text-white">
-                       T_final = min({(T_raw/10000).toFixed(2)}万, {(L_total_year_remaining/10000).toFixed(0)}万)
-                     </span>
-                   </div>
-                   <div className="flex justify-between items-center text-[10px]">
-                     <span className="text-[#64748B]">L_total_year_remaining (保单总剩余额度): <span className="text-green-400 font-mono">{(L_total_year_remaining/10000).toFixed(0)}万</span></span>
-                   </div>
-                   {T_raw > L_total_year_remaining && <div className="text-[11px] text-red-400 flex items-center gap-1 bg-red-500/10 p-2 rounded"><AlertTriangle className="w-4 h-4"/> 警告: 总赔付金额超过保单剩余总限额截断 (截断金额: {((T_raw - L_total_year_remaining)/10000).toFixed(2)}万)</div>}
-                </div>
-             </div>
+            </div>
           </div>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-[#475569] border border-dashed border-[#1E293B] rounded-lg mt-4 bg-[#111622]/50">
-             <Calculator className="w-12 h-12 mb-3 opacity-20" />
-             <p className="text-xs">请完整选择理赔参数以生成计算结果</p>
-          </div>
-        )}
       </div>
 
       <div className="bg-[#111622] border border-[#1E293B] rounded-lg p-4 shrink-0 flex justify-end gap-3 mt-auto">
         <button 
           onClick={handleGenerateDraft} 
-          disabled={!isCalculated}
+          disabled={!reservoirId}
           className="bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 disabled:opacity-50 disabled:cursor-not-allowed font-bold px-6 py-2 rounded flex items-center gap-2 text-sm transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)]"
         >
           <Save className="w-4 h-4" />

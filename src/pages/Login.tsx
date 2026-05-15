@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { User, Lock, Mail, ShieldAlert, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -77,7 +77,7 @@ export default function Login() {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider">登录账号</label>
+                <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider">账号 / 手机号</label>
                 <div className="relative group">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748B] group-focus-within:text-blue-500 transition-colors" />
                   <input 
@@ -86,7 +86,7 @@ export default function Login() {
                     onChange={(e) => setUsername(e.target.value)}
                     required
                     className="w-full bg-[#0F172A] border border-[#1E293B] rounded-xl px-10 py-3 text-white focus:border-blue-500 outline-none transition-colors placeholder:text-[#475569]"
-                    placeholder="请输入账号"
+                    placeholder="请输入账号或手机号"
                   />
                 </div>
               </div>
