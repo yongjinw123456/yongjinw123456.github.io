@@ -31,10 +31,9 @@ export default function Drought() {
           </select>
           <select className="bg-[#111622] border border-[#1E293B] rounded-lg px-4 py-2 text-sm text-white focus:border-red-500 outline-none">
             <option value="">干旱等级</option>
-            <option value="轻度干旱">轻度干旱</option>
-            <option value="中度干旱">中度干旱</option>
-            <option value="严重干旱">严重干旱</option>
-            <option value="特大干旱">特大干旱</option>
+            {[{ label: '轻度干旱', enabled: true }, { label: '中度干旱', enabled: true }, { label: '严重干旱', enabled: true }, { label: '特大干旱', enabled: false }].filter(l => l.enabled).map(l => (
+               <option key={l.label} value={l.label}>{l.label}</option>
+            ))}
           </select>
           <div className="relative">
              <Calendar className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -119,7 +118,9 @@ export default function Drought() {
                    <label className="text-sm text-[#94A3B8]">干旱等级 <span className="text-red-500">*</span></label>
                    <select className="bg-[#111622] border border-[#1E293B] rounded-lg px-3 py-2 text-sm text-white outline-none">
                      <option value="">选择等级</option>
-                     <option value="中度干旱">中度干旱</option>
+                     {[{ label: '轻度干旱', enabled: true }, { label: '中度干旱', enabled: true }, { label: '严重干旱', enabled: true }, { label: '特大干旱', enabled: false }].filter(l => l.enabled).map(l => (
+                       <option key={l.label} value={l.label}>{l.label}</option>
+                     ))}
                    </select>
                  </div>
                  <div className="flex flex-col gap-1.5 col-span-2">

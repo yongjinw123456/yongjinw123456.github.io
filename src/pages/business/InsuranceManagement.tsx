@@ -283,8 +283,8 @@ export default function InsuranceManagement() {
                    {drawerMode === 'create' ? <Plus className="w-4 h-4 text-tech-cyan" /> : drawerMode === 'edit' ? <Edit className="w-4 h-4 text-tech-cyan"/> : <FileText className="w-4 h-4 text-tech-cyan"/>}
                    {drawerMode === 'create' ? '新建保单配置' : drawerMode === 'edit' ? '编辑保单配置' : '保单配置详情'}
                  </h3>
-                 <button onClick={() => setIsDrawerOpen(false)} className="p-1.5 text-[#64748B] hover:text-white hover:bg-[#1E293B]/80 rounded-full transition-colors flex items-center justify-center">
-                    <X className="w-5 h-5" />
+                 <button onClick={() => setIsDrawerOpen(false)} className="px-2 py-1 text-[#64748B] hover:text-white hover:bg-slate-800 rounded transition-colors flex items-center justify-center border border-transparent hover:border-slate-700">
+                    <X className="w-4 h-4 mr-1" /> 关闭
                  </button>
               </div>
 
@@ -378,18 +378,29 @@ export default function InsuranceManagement() {
                               </tr>
                             </thead>
                             <tbody className="text-xs text-white divide-y divide-[#1E293B]">
-                               {tiers.map((t) => (
+                               {tiers.map((t, index) => (
                                  <tr key={t.id}>
-                                    <td className="px-3 py-2">{t.name}</td>
-                                    <td className="px-3 py-2 font-mono">{t.start}</td>
-                                    <td className="px-3 py-2 font-mono text-[#475569]">{t.end}</td>
-                                    <td className="px-3 py-2 font-mono text-orange-400">{t.fixed}</td>
-                                    <td className="px-3 py-2 font-mono text-[#475569]">{t.price}</td>
-                                    <td className="px-3 py-2 font-mono text-[#475569]">{t.limit}</td>
+                                    <td className="px-3 py-2">
+                                      {drawerMode !== 'view' ? <input className="w-20 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.name} onChange={(e) => { const nt = [...tiers]; nt[index].name = e.target.value; setTiers(nt); }}/> : t.name}
+                                    </td>
+                                    <td className="px-3 py-2 font-mono">
+                                      {drawerMode !== 'view' ? <input className="w-16 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.start} onChange={(e) => { const nt = [...tiers]; nt[index].start = e.target.value; setTiers(nt); }}/> : t.start}
+                                    </td>
+                                    <td className="px-3 py-2 font-mono text-[#475569]">
+                                      {drawerMode !== 'view' ? <input className="w-16 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.end} onChange={(e) => { const nt = [...tiers]; nt[index].end = e.target.value; setTiers(nt); }}/> : t.end}
+                                    </td>
+                                    <td className="px-3 py-2 font-mono text-orange-400">
+                                      {drawerMode !== 'view' ? <input className="w-24 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.fixed} onChange={(e) => { const nt = [...tiers]; nt[index].fixed = e.target.value; setTiers(nt); }}/> : t.fixed}
+                                    </td>
+                                    <td className="px-3 py-2 font-mono text-[#475569]">
+                                      {drawerMode !== 'view' ? <input className="w-20 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.price} onChange={(e) => { const nt = [...tiers]; nt[index].price = e.target.value; setTiers(nt); }}/> : t.price}
+                                    </td>
+                                    <td className="px-3 py-2 font-mono text-[#475569]">
+                                      {drawerMode !== 'view' ? <input className="w-24 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.limit} onChange={(e) => { const nt = [...tiers]; nt[index].limit = e.target.value; setTiers(nt); }}/> : t.limit}
+                                    </td>
                                     {drawerMode !== 'view' && (
                                        <td className="px-3 py-2 text-right">
                                          <div className="flex items-center justify-end gap-1">
-                                            <button className="p-1 text-[#64748B] hover:text-tech-cyan rounded"><Edit className="w-3.5 h-3.5" /></button>
                                             <button onClick={() => setTiers(tiers.filter(ti => ti.id !== t.id))} className="p-1 text-[#64748B] hover:text-red-400 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
                                          </div>
                                        </td>
@@ -424,15 +435,20 @@ export default function InsuranceManagement() {
                                   </tr>
                                 </thead>
                                 <tbody className="text-xs text-white divide-y divide-[#1E293B]">
-                                   {floats.map((f) => (
+                                   {floats.map((f, index) => (
                                       <tr key={f.id}>
-                                        <td className="px-3 py-2">{f.duration}</td>
-                                        <td className={cn("px-3 py-2 font-mono", f.color)}>{f.ratio}</td>
-                                        <td className={cn("px-3 py-2 font-mono", f.color)}>{f.increment}</td>
+                                        <td className="px-3 py-2">
+                                          {drawerMode !== 'view' ? <input className="w-24 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={f.duration} onChange={(e) => { const nf = [...floats]; nf[index].duration = e.target.value; setFloats(nf); }}/> : f.duration}
+                                        </td>
+                                        <td className={cn("px-3 py-2 font-mono", f.color)}>
+                                          {drawerMode !== 'view' ? <input className="w-20 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none text-white" value={f.ratio} onChange={(e) => { const nf = [...floats]; nf[index].ratio = e.target.value; setFloats(nf); }}/> : f.ratio}
+                                        </td>
+                                        <td className={cn("px-3 py-2 font-mono", f.color)}>
+                                          {drawerMode !== 'view' ? <input className="w-20 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none text-white" value={f.increment} onChange={(e) => { const nf = [...floats]; nf[index].increment = e.target.value; setFloats(nf); }}/> : f.increment}
+                                        </td>
                                         {drawerMode !== 'view' && (
                                            <td className="px-3 py-2 text-right">
                                              <div className="flex items-center justify-end gap-1">
-                                                <button className="p-1 text-[#64748B] hover:text-tech-cyan rounded"><Edit className="w-3.5 h-3.5" /></button>
                                                 <button onClick={() => setFloats(floats.filter(fl => fl.id !== f.id))} className="p-1 text-[#64748B] hover:text-red-400 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
                                              </div>
                                            </td>

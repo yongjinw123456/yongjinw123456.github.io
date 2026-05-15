@@ -400,8 +400,8 @@ export default function ClaimsRecords() {
                                A = min(A1 + A2, L_a_once, L_a_year_remaining)
                             </div>
                             <div className="text-[10px] mt-2 grid grid-cols-2 gap-1 text-[#64748B]">
-                              <span>A1 (阶梯): 3,000,000</span>
-                              <span>A2 (上浮): {activeRecord?.upfloatAmount || 2480000}</span>
+                              <span>A1 (阶梯): <span className="text-white">{activeRecord?.accidentAmount !== undefined ? activeRecord.accidentAmount : 3000000}</span></span>
+                              <span>A2 (上浮): <span className="text-white">{activeRecord?.upfloatAmount !== undefined ? activeRecord.upfloatAmount : 2480000}</span></span>
                               <span>L_a_once: 500w</span><span>L_a_yr: 1000w</span>
                             </div>
                          </div>
