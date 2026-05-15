@@ -1,6 +1,9 @@
 import { User, Shield, ChevronRight, Lock, LogOut, Bell, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col min-h-full fade-in pb-8">
       {/* Header Profile Info */}
@@ -60,7 +63,7 @@ export default function Profile() {
         </div>
 
         <div className="bg-[#111622] border border-[#1E293B] rounded-xl overflow-hidden shadow-sm mt-4">
-          <button className="w-full flex items-center justify-center p-4 bg-transparent hover:bg-red-500/10 text-red-500 transition-colors active:bg-red-500/20 gap-2">
+          <button onClick={() => navigate('/h5/login')} className="w-full flex items-center justify-center p-4 bg-transparent hover:bg-red-500/10 text-red-500 transition-colors active:bg-red-500/20 gap-2">
             <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">退出登录</span>
           </button>

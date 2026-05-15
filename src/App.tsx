@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import H5Layout from './components/H5Layout';
 import PlaceholderPage from './pages/PlaceholderPage';
+import Login from './pages/Login';
+import H5Login from './pages/h5/Login';
 import Stats from './pages/h5/Stats';
 import Events from './pages/h5/Events';
 import Profile from './pages/h5/Profile';
@@ -30,7 +32,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/h5/login" element={<H5Login />} />
         
         {/* Core Backend Routes */}
         <Route element={<AdminLayout />}>
