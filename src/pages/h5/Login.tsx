@@ -75,13 +75,6 @@ export default function H5Login() {
               </button>
             </form>
 
-            {/* Additional Links */}
-            <div className="mt-8 flex items-center justify-center gap-4 text-sm text-[#64748B]">
-              <a href="#" className="hover:text-blue-400">联系系统管理员</a>
-              <span className="w-px h-3 bg-[#1E293B]"></span>
-              <button onClick={() => navigate('/login')} className="hover:text-cyan-400">访问管理后台</button>
-            </div>
-
           </div>
         </div>
         

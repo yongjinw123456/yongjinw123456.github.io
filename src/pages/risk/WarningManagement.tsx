@@ -135,13 +135,6 @@ export default function WarningManagement() {
             RISK / WARNING MANAGEMENT
           </p>
         </div>
-        <button 
-          onClick={() => setIsManualCreateOpen(true)}
-          className="flex items-center gap-2 bg-tech-cyan hover:bg-tech-cyan/90 text-[#0B0F17] px-4 py-2 rounded-lg font-bold text-sm shadow-[0_0_15px_rgba(0,242,255,0.3)] transition-all"
-        >
-          <AlertTriangle className="w-4 h-4" />
-          <span>手动创建预警</span>
-        </button>
       </header>
 
       {/* Filter Section */}
@@ -268,14 +261,6 @@ export default function WarningManagement() {
                            <span className="hidden xl:inline text-[10px]">处理</span>
                          </button>
                        )}
-                       <button 
-                         onClick={() => navigate(`/risk/claims/calculator?warningEventId=${row.id}&reservoirId=${row.reservoirId}`)}
-                         className="flex items-center gap-1 p-1.5 text-tech-cyan hover:text-white hover:bg-tech-cyan/20 rounded transition-colors whitespace-nowrap bg-tech-cyan/10" 
-                         title="转入理赔"
-                       >
-                         <ArrowRight className="w-4 h-4" />
-                         <span className="hidden xl:inline text-[10px]">转理赔</span>
-                       </button>
                     </div>
                   </td>
                 </tr>
@@ -565,6 +550,51 @@ export default function WarningManagement() {
                     </table>
                   </div>
                 </div>
+
+                {activeEvent.status !== '待处理' && (
+                  <div className="bg-[#111622] border border-[#1E293B] rounded p-4 mt-6">
+                    <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4">处理结果</h4>
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-xs">
+                      <div className="space-y-1.5">
+                        <span className="text-[#64748B]">预警处理方式：</span>
+                        <div className="text-white mt-1.5 px-3 py-2 rounded bg-[#0F172A] border border-[#1E293B]">{activeEvent.status === '已解除' ? '解除预警' : '预警归因'}</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-[#64748B]">预警归因：</span>
+                        <div className="text-white mt-1.5 px-3 py-2 rounded bg-[#0F172A] border border-[#1E293B]">{activeEvent.status === '已解除' ? '--' : '台风、暴雨'}</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-[#64748B]">操作人：</span>
+                        <div className="text-white mt-1.5 px-3 py-2 rounded bg-[#0F172A] border border-[#1E293B]">系统管理员</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-[#64748B]">操作时间：</span>
+                        <div className="text-white mt-1.5 px-3 py-2 rounded bg-[#0F172A] border border-[#1E293B] font-mono">2024-05-12 15:30:00</div>
+                      </div>
+                      <div className="col-span-2 space-y-1.5">
+                        <span className="text-[#64748B]">处理说明：</span>
+                        <p className="text-white mt-1.5 p-3 bg-[#0F172A] border border-[#1E293B] rounded leading-relaxed min-h-[60px]">
+                          {activeEvent.status === '已解除' ? '水位已回落至正常水平，解除预警状态。' : '预警中心已核实情况，是由近期连续降雨引起的正常水位偏高，暂不构成理赔条件，先归因记录。'}
+                        </p>
+                      </div>
+                      <div className="col-span-2 space-y-1.5">
+                        <span className="text-[#64748B]">处理附件：</span>
+                        <div className="flex flex-wrap gap-2 mt-1.5">
+                          <div className="flex items-center gap-2 p-2 border border-[#1E293B] hover:border-tech-cyan transition-colors rounded bg-[#0F172A] cursor-pointer group">
+                            <FileText className="w-4 h-4 text-[#64748B] group-hover:text-tech-cyan" />
+                            <span className="text-xs text-white group-hover:text-tech-cyan transition-colors select-none">现场核实记录表.pdf</span>
+                          </div>
+                          {activeEvent.status !== '已解除' && (
+                            <div className="flex items-center gap-2 p-2 border border-[#1E293B] hover:border-tech-cyan transition-colors rounded bg-[#0F172A] cursor-pointer group">
+                              <FileText className="w-4 h-4 text-[#64748B] group-hover:text-tech-cyan" />
+                              <span className="text-xs text-white group-hover:text-tech-cyan transition-colors select-none">情况说明.doc</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
               </div>
             </motion.div>

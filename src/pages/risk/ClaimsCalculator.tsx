@@ -127,6 +127,14 @@ export default function ClaimsCalculator() {
                     </select>
                   </div>
                   <div className="space-y-1.5 col-span-2 md:col-span-1">
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">理赔类型</label>
+                    <select value={claimType} onChange={e => setClaimType(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none">
+                      <option value="防洪">防洪理赔</option>
+                      <option value="干旱">干旱理赔</option>
+                      <option value="其他">其他</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
                     <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">关联保单</label>
                     <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-tech-cyan font-mono outline-none appearance-none focus:border-tech-cyan transition-colors">
                       <option value="POL-20240510-001">POL-20240510-001 (保障中)</option>
@@ -134,9 +142,9 @@ export default function ClaimsCalculator() {
                     </select>
                   </div>
                   <div className="space-y-1.5 col-span-2">
-                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">关联预警事件 <span className="text-[#64748B] font-normal lowercase">(Optional)</span></label>
+                    <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">关联预警事件 <span className="text-red-500">*</span></label>
                     <select value={warningEventId} onChange={e => setWarningEventId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-orange-400 font-mono outline-none">
-                      <option value="">手工录入(无关联预警)</option>
+                      <option value="">请选择预警事件</option>
                       <option value="EVT-001">EVT-001</option>
                     </select>
                   </div>
@@ -150,18 +158,16 @@ export default function ClaimsCalculator() {
                   </div>
                   <div className="space-y-2 col-span-2">
                     <div className="flex justify-between items-center text-[10px] uppercase tracking-widest">
-                      <label className="text-[#94A3B8]">各阶梯区间淹没时长 <span className="text-[#64748B] normal-case tracking-normal">(选填记录用，不参与计算)</span></label>
-                      <button onClick={addStepDuration} className="text-tech-cyan hover:underline hover:text-white transition-colors">+ 添加记录</button>
+                      <label className="text-[#94A3B8]">各阶梯区间淹没时长 <span className="text-[#64748B] normal-case tracking-normal">(选填记录用，自动从预警事件中读取，不参与计算)</span></label>
                     </div>
-                    {stepDurations.map((step, idx) => (
-                      <div key={step.id} className="flex gap-2 items-center bg-[#0F172A] p-2 rounded border border-[#1E293B]">
-                        <input type="text" placeholder="阶梯名称" value={step.name} onChange={e => updateStepDuration(step.id, 'name', e.target.value)} className="flex-1 min-w-[70px] bg-transparent border-b border-[#334155] text-xs text-white outline-none px-1 py-0.5" />
-                        <input type="text" placeholder="起止水位(144-145)" value={step.range} onChange={e => updateStepDuration(step.id, 'range', e.target.value)} className="flex-[1.5] min-w-[100px] bg-transparent border-b border-[#334155] text-xs text-white outline-none px-1 py-0.5" />
-                        <div className="flex items-center gap-1 border-b border-[#334155]">
-                          <input type="number" placeholder="0" value={step.duration} onChange={e => updateStepDuration(step.id, 'duration', Number(e.target.value))} className="w-16 bg-transparent text-xs text-white outline-none px-1 py-0.5 font-mono text-right" />
+                    {stepDurations.map((step) => (
+                      <div key={step.id} className="flex gap-2 items-center bg-[#0F172A] p-2 rounded border border-[#1E293B] cursor-not-allowed opacity-80">
+                        <input type="text" readOnly value={step.name} className="flex-1 min-w-[70px] bg-transparent border-b border-transparent text-xs text-white outline-none px-1 py-0.5 cursor-not-allowed" />
+                        <input type="text" readOnly value={step.range} className="flex-[1.5] min-w-[100px] bg-transparent border-b border-transparent text-xs text-white outline-none px-1 py-0.5 cursor-not-allowed text-center" />
+                        <div className="flex items-center gap-1">
+                          <input type="number" readOnly value={step.duration} className="w-16 bg-transparent text-xs text-white outline-none px-1 py-0.5 font-mono text-right cursor-not-allowed" />
                           <span className="text-[10px] text-[#64748B]">时</span>
                         </div>
-                        <button onClick={() => removeStepDuration(step.id)} className="text-[#64748B] hover:text-red-400 p-1"><X className="w-3 h-3" /></button>
                       </div>
                     ))}
                   </div>
@@ -191,8 +197,16 @@ export default function ClaimsCalculator() {
                     <span className="font-mono text-blue-400 block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">¥{F_j.toLocaleString()}</span>
                   </div>
                   <div className="space-y-1">
+                    <span className="text-[#64748B] block">超出水位步数 N_j</span>
+                    <span className="font-mono text-white block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">{N_j} 步</span>
+                  </div>
+                  <div className="space-y-1">
                     <span className="text-[#64748B] block">超出水位单价 P_j</span>
                     <span className="font-mono text-white block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">¥{P_j.toLocaleString()}/0.01m</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[#64748B] block">区间累计赔付上限 M_j</span>
+                    <span className="font-mono text-white block bg-[#0F172A] px-2 py-1 rounded border border-[#1E293B]">¥{M_j.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -245,8 +259,18 @@ export default function ClaimsCalculator() {
                  <div className="p-5">
                    <h4 className="text-sm font-bold text-white mb-4 textShadow">基础赔付分析</h4>
                    <div className="flex justify-between items-baseline mb-4">
-                     <span className="text-[#94A3B8] text-xs">基础赔付金额 (A_base)</span>
+                     <span className="text-[#94A3B8] text-xs flex flex-col">
+                        <span>基础赔付金额 (A_base)</span>
+                     </span>
                      <span className="text-2xl font-mono text-blue-400 font-bold tracking-tight">¥{A_base.toLocaleString()}</span>
+                   </div>
+                   <div className="flex justify-between items-baseline mb-4 pt-2 border-t border-[#2A344A]">
+                     <span className="text-[#94A3B8] text-xs">每次事故绝对免赔额</span>
+                     <span className="text-sm font-mono text-white font-bold">¥50,000</span>
+                   </div>
+                   <div className="flex justify-between items-baseline mb-4 pt-2 border-t border-[#2A344A]">
+                     <span className="text-tech-cyan text-xs">免赔后事故金额</span>
+                     <span className="text-xl font-mono text-tech-cyan font-bold tracking-tight">¥{Math.max(0, A_base - 50000).toLocaleString()}</span>
                    </div>
                    <div className="text-[10px] font-mono text-[#64748B] bg-[#0F172A] p-2 rounded border border-[#1E293B] leading-relaxed mb-4">
                      公式: A_base = F_j + floor((H_max - s_j) / 0.01) × P_j<br/>

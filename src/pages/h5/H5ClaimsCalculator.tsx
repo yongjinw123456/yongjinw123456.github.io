@@ -89,10 +89,18 @@ export default function H5ClaimsCalculator() {
                     <option value="zhaoshandu">赵山渡水库</option>
                   </select>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-[#94A3B8] uppercase tracking-widest">关联预警事件</label>
+                <div className="space-y-1.5 mt-2">
+                  <label className="text-xs text-[#94A3B8] uppercase tracking-widest">理赔类型 <span className="text-red-500">*</span></label>
+                  <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-sm text-white outline-none">
+                    <option value="防洪">防洪理赔</option>
+                    <option value="干旱">干旱理赔</option>
+                    <option value="其他">其他</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5 mt-4">
+                  <label className="text-xs text-[#94A3B8] uppercase tracking-widest">关联预警事件 <span className="text-red-500">*</span></label>
                   <select value={warningEventId} onChange={e => setWarningEventId(e.target.value)} className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-sm text-orange-400 outline-none">
-                    <option value="">(无关联预警)</option>
+                    <option value="">请选择预警事件</option>
                     <option value="EVT-001">EVT-001</option>
                   </select>
                 </div>
@@ -109,19 +117,29 @@ export default function H5ClaimsCalculator() {
 
                 <div className="space-y-2 mt-4 pt-4 border-t border-[#1E293B]">
                    <div className="flex justify-between items-center text-xs uppercase tracking-widest">
-                     <label className="text-[#94A3B8]">各阶梯区间淹没时长</label>
-                     <button onClick={addStepDuration} className="text-tech-cyan">+ 添加</button>
+                     <label className="text-[#94A3B8]">各阶梯区间淹没时长 (只读)</label>
                    </div>
                    {stepDurations.map(step => (
-                     <div key={step.id} className="flex gap-2 items-center bg-[#0F172A] p-2 rounded border border-[#1E293B]">
-                       <input type="text" placeholder="阶梯" value={step.name} onChange={e => updateStepDuration(step.id, 'name', e.target.value)} className="w-12 bg-transparent border-b border-[#334155] text-sm text-white outline-none px-1 py-1" />
-                       <input type="text" placeholder="范围" value={step.range} onChange={e => updateStepDuration(step.id, 'range', e.target.value)} className="flex-1 bg-transparent border-b border-[#334155] text-sm text-white outline-none px-1 py-1" />
-                       <input type="number" value={step.duration} onChange={e => updateStepDuration(step.id, 'duration', Number(e.target.value))} className="w-12 bg-transparent border-b border-[#334155] text-sm text-white outline-none px-1 py-1 font-mono text-center" />
+                     <div key={step.id} className="flex gap-2 items-center bg-[#0F172A] p-2 rounded border border-[#1E293B] opacity-80 cursor-not-allowed">
+                       <input type="text" readOnly value={step.name} className="w-12 bg-transparent border-b border-[#334155] text-sm text-white outline-none px-1 py-1 cursor-not-allowed" />
+                       <input type="text" readOnly value={step.range} className="flex-1 bg-transparent border-b border-[#334155] text-sm text-white outline-none px-1 py-1 cursor-not-allowed" />
+                       <input type="number" readOnly value={step.duration} className="w-12 bg-transparent border-b border-[#334155] text-sm text-white outline-none px-1 py-1 font-mono text-center cursor-not-allowed" />
                        <span className="text-xs text-[#64748B]">h</span>
-                       <button onClick={() => removeStepDuration(step.id)} className="text-[#64748B] hover:text-red-400"><X className="w-5 h-5" /></button>
                      </div>
                    ))}
                 </div>
+                
+                 <div className="space-y-2 mt-4 pt-4 border-t border-[#1E293B]">
+                    <h4 className="text-xs text-[#f59e0b] font-bold">基本参数快照</h4>
+                    <div className="flex justify-between items-center bg-[#0F172A] p-2 rounded border border-[#1E293B]">
+                       <span className="text-xs text-[#94A3B8]">区间累计赔付上限 M_j</span>
+                       <span className="text-sm font-mono text-white">¥2,000,000</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-[#0F172A] p-2 rounded border border-[#1E293B]">
+                       <span className="text-xs text-[#94A3B8]">超出水位步数 N_j</span>
+                       <span className="text-sm font-mono text-white">{N_j} 步</span>
+                    </div>
+                 </div>
              </div>
           </div>
 
@@ -162,6 +180,14 @@ export default function H5ClaimsCalculator() {
                  <span className="text-base font-mono text-blue-400 font-bold">¥{A_base.toLocaleString()}</span>
                </div>
                <div className="flex justify-between items-center border-b border-tech-cyan/10 pb-3">
+                 <span className="text-sm text-[#94A3B8]">每次事故绝对免赔额</span>
+                 <span className="text-base font-mono text-red-400 font-bold">-¥5,000</span>
+               </div>
+               <div className="flex justify-between items-center border-b border-tech-cyan/10 pb-3">
+                 <span className="text-sm text-[#94A3B8]">免赔后事故金额</span>
+                 <span className="text-base font-mono text-blue-400 font-bold">¥{Math.max(0, A_base - 5000).toLocaleString()}</span>
+               </div>
+               <div className="flex justify-between items-center border-b border-tech-cyan/10 pb-3">
                  <span className="text-sm text-[#94A3B8]">转移安置 (R)</span>
                  <span className="text-base font-mono text-orange-400 font-bold">¥{R.toLocaleString()}</span>
                </div>
@@ -182,12 +208,11 @@ export default function H5ClaimsCalculator() {
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#0F172A]/90 backdrop-blur border-t border-[#1E293B] z-20">
           <button 
             onClick={() => {
-               // 模拟暂存草稿，然后退回，或者跳转页面
-               navigate('/h5/events');
+               navigate('/h5/events?tab=claims');
             }}
             className="w-full bg-tech-cyan text-[#0B0F17] py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,242,255,0.3)] transition-all active:scale-95"
           >
-            <Save className="w-5 h-5" /> 暂存理赔评估草稿
+            <Calculator className="w-5 h-5" /> 生成理赔草稿
           </button>
         </div>
       </div>

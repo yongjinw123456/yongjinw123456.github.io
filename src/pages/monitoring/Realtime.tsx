@@ -134,7 +134,7 @@ export default function Realtime() {
             </div>
             <div className="flex items-baseline gap-2">
                <span className="text-3xl font-mono text-white tracking-tight">3</span>
-               <span className="text-xs text-[#64748B]">笔相关记录</span>
+               <span className="text-xs text-[#64748B]">笔理赔记录</span>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-mono">
                <div className="bg-[#0F172A] px-2 py-1.5 rounded border border-[#1E293B] flex flex-col gap-0.5">
@@ -239,51 +239,43 @@ export default function Realtime() {
               <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar pr-2 mt-2 relative">
                  <div className="absolute left-[9px] top-2 bottom-4 w-px bg-[#1E293B]"></div>
                  
+                 {/* 预警摘要 (未处理) */}
                  <div className="flex gap-4 relative z-10">
                     <div className="w-[19px] h-[19px] rounded-full bg-[#111622] border-2 border-orange-400 flex items-center justify-center shrink-0 mt-0.5">
                        <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
                     </div>
                     <div className="flex flex-col gap-1.5 p-3 bg-orange-500/5 border border-orange-500/20 rounded w-full cursor-pointer hover:bg-orange-500/10 transition-colors" onClick={() => navigate('/risk/warning')}>
                        <div className="flex justify-between items-start">
-                          <span className="text-xs font-bold text-orange-400">橙色预警触发 (144.60m)</span>
+                          <span className="text-xs font-bold text-orange-400">当前预警等级：橙色预警 (144.60m) - 珊溪水库</span>
                           <span className="text-[9px] text-[#64748B] font-mono">10:05</span>
                        </div>
-                       <span className="text-[10px] text-[#94A3B8]">当前事件 [EVT-001] 持续超线，水位较昨日上涨 2.1m。</span>
+                       <span className="text-[10px] text-[#94A3B8]">预警说明：预警事件持续超线，水位较昨日上涨 2.1 m。</span>
                     </div>
                  </div>
 
+                 {/* 预警摘要 (已处理) */}
+                 <div className="flex gap-4 relative z-10">
+                    <div className="w-[19px] h-[19px] rounded-full bg-[#111622] border-2 border-[#1E293B] flex items-center justify-center shrink-0 mt-0.5">
+                       <div className="w-1.5 h-1.5 rounded-full bg-[#64748B]"></div>
+                    </div>
+                    <div className="flex flex-col gap-1.5 p-3 bg-[#0F172A] border border-[#1E293B] rounded w-full cursor-pointer hover:bg-[#1E293B] transition-colors" onClick={() => navigate('/risk/warning')}>
+                       <div className="flex justify-between items-start">
+                          <span className="text-xs font-bold text-[#94A3B8]">处理结果：解除预警 - 桥墩水库</span>
+                          <span className="text-[9px] text-[#64748B] font-mono">08:30</span>
+                       </div>
+                       <span className="text-[10px] text-[#64748B]">情况说明：水位已回落至正常水平，解除预警状态。</span>
+                    </div>
+                 </div>
+
+                 {/* 理赔摘要 */}
                  <div className="flex gap-4 relative z-10">
                     <div className="w-[19px] h-[19px] rounded-full bg-[#111622] border-2 border-blue-400 flex items-center justify-center shrink-0 mt-0.5"></div>
                     <div className="flex flex-col gap-1.5 p-3 bg-[#0F172A] border border-[#1E293B] rounded w-full cursor-pointer hover:bg-[#1E293B] transition-colors" onClick={() => navigate('/risk/claims/records')}>
                        <div className="flex justify-between items-start">
-                          <span className="text-xs font-bold text-blue-400">提交理赔材料待确认</span>
+                          <span className="text-xs font-bold text-blue-400">保单号：INS202405001</span>
                           <span className="text-[9px] text-[#64748B] font-mono">昨日 16:30</span>
                        </div>
-                       <span className="text-[10px] text-[#94A3B8]">关联预警 [EVT-000]，估损总额 548.0 万。</span>
-                    </div>
-                 </div>
-                 
-                 <div className="flex gap-4 relative z-10">
-                    <div className="w-[19px] h-[19px] rounded-full bg-[#111622] border-2 border-[#1E293B] flex items-center justify-center shrink-0 mt-0.5">
-                       <WifiOff className="w-2.5 h-2.5 text-[#64748B]" />
-                    </div>
-                    <div className="flex flex-col gap-1.5 p-3 bg-[#0F172A] border border-[#1E293B] rounded w-full">
-                       <div className="flex justify-between items-start">
-                          <span className="text-xs font-bold text-[#94A3B8]">前端网关采集超时掉线</span>
-                          <span className="text-[9px] text-[#64748B] font-mono">昨日 23:05</span>
-                       </div>
-                       <span className="text-[10px] text-[#64748B]">已自动复位恢复。</span>
-                    </div>
-                 </div>
-
-                 <div className="flex gap-4 relative z-10">
-                    <div className="w-[19px] h-[19px] rounded-full bg-[#111622] border-2 border-green-400 flex items-center justify-center shrink-0 mt-0.5"></div>
-                    <div className="flex flex-col gap-1.5 p-3 bg-[#0F172A] border border-[#1E293B] rounded w-full">
-                       <div className="flex justify-between items-start">
-                          <span className="text-xs font-bold text-green-400">预警解除闭环</span>
-                          <span className="text-[9px] text-[#64748B] font-mono">前日 15:20</span>
-                       </div>
-                       <span className="text-[10px] text-[#94A3B8]">水位回落正常，结束防汛响应。</span>
+                       <span className="text-[10px] text-[#94A3B8]">管理员 提交的理赔记录，预计赔付金额 5,480,000 元。</span>
                     </div>
                  </div>
               </div>

@@ -72,7 +72,7 @@ export default function RiskReduction() {
             <option value="2">桥墩水库</option>
           </select>
           
-          {(activeTab === 'patrol' || activeTab === 'survey') && (
+          {activeTab === 'patrol' && (
             <select className="bg-[#111622] border border-[#1E293B] rounded-lg px-4 py-2 text-sm text-white focus:border-[#f59e0b] outline-none">
               <option value="">是否存在隐患</option>
               <option value="yes">是</option>
@@ -116,10 +116,6 @@ export default function RiskReduction() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 bg-[#111622] hover:bg-[#1E293B] border border-[#1E293B] text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
-            <Download className="w-4 h-4" />
-            导出
-          </button>
           
           {activeTab === 'patrol' && (
             <button onClick={() => handleOpenModal('patrol', 'create')} className="flex items-center gap-2 bg-[#f59e0b] hover:bg-[#d97706] text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-[0_0_15px_rgba(245,158,11,0.3)]">
@@ -290,43 +286,6 @@ export default function RiskReduction() {
                          <span className="text-xs">必须上传调查报告</span>
                        </div>
                      </div>
-
-                     <div className="flex items-center justify-between p-4 bg-[#111622] border border-[#1E293B] rounded-lg">
-                       <div>
-                         <div className="text-sm font-medium text-white mb-0.5">是否存在隐患</div>
-                         <div className="text-xs text-[#64748B]">如果发现问题，将自动生成隐患整改任务</div>
-                       </div>
-                       <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" className="sr-only peer" checked={hasHiddenDangers} onChange={(e) => setHasHiddenDangers(e.target.checked)} />
-                          <div className="w-11 h-6 bg-[#1E293B] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
-                       </label>
-                     </div>
-
-                     {hasHiddenDangers && (
-                       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 p-4 border border-red-500/20 bg-red-500/5 rounded-lg">
-                         <div>
-                           <label className="block text-xs text-[#94A3B8] mb-1.5">隐患描述 <span className="text-red-500">*</span></label>
-                           <textarea className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none h-20 resize-none transition-colors" placeholder="隐患情况说明"></textarea>
-                         </div>
-                         <div className="grid grid-cols-2 gap-4">
-                           <div>
-                             <label className="block text-xs text-[#94A3B8] mb-1.5">隐患等级 <span className="text-red-500">*</span></label>
-                             <select className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none transition-colors">
-                               <option value="">请选择等级</option>
-                               <option value="1">一般隐患</option>
-                               <option value="2">重大隐患</option>
-                             </select>
-                           </div>
-                         </div>
-                         <div>
-                           <label className="block text-xs text-[#94A3B8] mb-1.5">隐患图片上传</label>
-                           <div className="border-2 border-dashed border-[#1E293B] hover:border-[#f59e0b]/50 rounded-lg p-6 flex flex-col items-center justify-center text-[#64748B] hover:text-[#f59e0b] transition-colors cursor-pointer bg-[#111622]">
-                             <UploadCloud className="w-8 h-8 mb-2" />
-                             <span className="text-xs">点击或拖拽上传图片</span>
-                           </div>
-                         </div>
-                       </motion.div>
-                     )}
                   </div>
                 )}
 
@@ -363,52 +322,25 @@ export default function RiskReduction() {
 
                        <div>
                          <label className="block text-xs text-[#94A3B8] mb-1.5">整改状态 <span className="text-red-500">*</span></label>
-                         <select value={rectStatus} onChange={(e) => setRectStatus(e.target.value)} className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none transition-colors">
-                           <option value="未整改">未整改</option>
+                         <select value={rectStatus === '未整改' || rectStatus === '已闭环' ? '整改中' : rectStatus} onChange={(e) => setRectStatus(e.target.value)} className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none transition-colors">
                            <option value="整改中">整改中</option>
                            <option value="已整改">已整改</option>
-                           <option value="已闭环">已闭环</option>
                          </select>
                        </div>
 
                        <AnimatePresence>
                        {/* Show when status is >= 已整改 */}
-                       {(rectStatus === '已整改' || rectStatus === '已闭环') && (
+                       {(rectStatus === '已整改') && (
                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden">
                            <div className="pt-2">
                              <label className="block text-xs text-[#94A3B8] mb-1.5">实际整改时间 <span className="text-red-500">*</span></label>
                              <input type="date" className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none transition-colors [color-scheme:dark]" />
                            </div>
                            <div>
-                             <label className="block text-xs text-[#94A3B8] mb-1.5">整改结果描述 <span className="text-red-500">*</span></label>
-                             <textarea className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none h-20 resize-none transition-colors" placeholder="处理结果说明"></textarea>
-                           </div>
-                           <div>
-                             <label className="block text-xs text-[#94A3B8] mb-1.5">整改后图片</label>
+                             <label className="block text-xs text-[#94A3B8] mb-1.5">整改图片</label>
                              <div className="border border-dashed border-[#1E293B] rounded-lg p-4 flex flex-col items-center justify-center text-[#64748B] hover:text-[#f59e0b] transition-colors cursor-pointer bg-[#111622]">
                                <UploadCloud className="w-6 h-6 mb-2" />
-                               <span className="text-xs">上传整改后的佐证图片</span>
-                             </div>
-                           </div>
-                         </motion.div>
-                       )}
-                       </AnimatePresence>
-
-                       <AnimatePresence>
-                       {/* Show when status == 已闭环 */}
-                       {rectStatus === '已闭环' && (
-                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                           <div className="p-4 border border-green-500/20 bg-green-500/5 rounded-lg space-y-4">
-                             <div>
-                               <label className="block text-xs text-[#94A3B8] mb-1.5">闭环确认说明 <span className="text-red-500">*</span></label>
-                               <textarea className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-sm text-white focus:border-[#f59e0b] outline-none h-20 resize-none transition-colors" placeholder="经过验证确认隐患已消除"></textarea>
-                             </div>
-                             <div>
-                               <label className="block text-xs text-[#94A3B8] mb-1.5">闭环附件</label>
-                               <div className="border border-dashed border-[#1E293B] rounded-lg p-4 flex flex-col items-center justify-center text-[#64748B] hover:text-[#f59e0b] transition-colors cursor-pointer bg-[#111622]/50">
-                                 <UploadCloud className="w-6 h-6 mb-2" />
-                                 <span className="text-xs">上传闭环证明材料文件</span>
-                               </div>
+                               <span className="text-xs">上传整改图片</span>
                              </div>
                            </div>
                          </motion.div>
@@ -625,7 +557,6 @@ function SurveyTable({ handleOpenModal, setIsDrawerOpen }: any) {
             <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase whitespace-nowrap">调查时间段</th>
             <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase whitespace-nowrap">调查结果概述</th>
             <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase whitespace-nowrap">报告上传</th>
-            <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase whitespace-nowrap">发现隐患</th>
             <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase whitespace-nowrap">创建人</th>
             <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase whitespace-nowrap">创建时间</th>
             <th className="px-6 py-4 text-xs font-bold text-[#64748B] uppercase text-right whitespace-nowrap">操作</th>
@@ -640,11 +571,6 @@ function SurveyTable({ handleOpenModal, setIsDrawerOpen }: any) {
                 <button className="flex items-center gap-1.5 text-xs text-tech-cyan hover:underline bg-tech-cyan/10 border border-tech-cyan/20 px-2 py-1 rounded">
                    <LinkIcon className="w-3 h-3" /> 下载报告
                 </button>
-             </td>
-             <td className="px-6 py-4">
-                <span className="text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded text-xs w-fit flex items-center gap-1.5">
-                   <ShieldAlert className="w-3 h-3" /> 是
-                </span>
              </td>
              <td className="px-6 py-4 text-xs text-[#94A3B8]">第三方风控</td>
              <td className="px-6 py-4 text-xs font-mono text-[#64748B]">2025-01-20 14:00</td>

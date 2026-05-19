@@ -87,18 +87,18 @@ export default function InsuranceManagement() {
   ]);
 
   const [floats, setFloats] = useState([
-    { id: '1', duration: '<= 1 天', ratio: '100%', increment: '0%', color: 'text-white' },
-    { id: '2', duration: '1 ~ 3 天', ratio: '110%', increment: '10%', color: 'text-blue-400' },
-    { id: '3', duration: '3 ~ 7 天', ratio: '120%', increment: '20%', color: 'text-orange-400' },
-    { id: '4', duration: '> 7 天', ratio: '130%', increment: '30%', color: 'text-red-400' },
+    { id: '1', minDuration: '0', maxDuration: '24', ratio: '100%', increment: '0%', color: 'text-white' },
+    { id: '2', minDuration: '24', maxDuration: '72', ratio: '110%', increment: '10%', color: 'text-blue-400' },
+    { id: '3', minDuration: '72', maxDuration: '168', ratio: '120%', increment: '20%', color: 'text-orange-400' },
+    { id: '4', minDuration: '168', maxDuration: '', ratio: '130%', increment: '30%', color: 'text-red-400' },
   ]);
 
   const handleAddTier = () => {
-    setTiers([...tiers, { id: Date.now().toString(), name: `新增赔付阶梯${tiers.length+1}`, start: '0', end: '0', fixed: '0', price: '0', limit: '0' }]);
+    setTiers([...tiers, { id: Date.now().toString(), name: '一级赔付', start: '0', end: '0', fixed: '0', price: '0', limit: '0' }]);
   };
 
   const handleAddFloat = () => {
-    setFloats([...floats, { id: Date.now().toString(), duration: '新档位', ratio: '100%', increment: '0%', color: 'text-white' }]);
+    setFloats([...floats, { id: Date.now().toString(), minDuration: '0', maxDuration: '0', ratio: '100%', increment: '0%', color: 'text-white' }]);
   };
 
   const openDrawer = (mode: 'create' | 'edit' | 'view', record?: InsuranceRecord) => {
@@ -381,7 +381,18 @@ export default function InsuranceManagement() {
                                {tiers.map((t, index) => (
                                  <tr key={t.id}>
                                     <td className="px-3 py-2">
-                                      {drawerMode !== 'view' ? <input className="w-20 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.name} onChange={(e) => { const nt = [...tiers]; nt[index].name = e.target.value; setTiers(nt); }}/> : t.name}
+                                      {drawerMode !== 'view' ? (
+                                        <select 
+                                          className="w-24 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" 
+                                          value={t.name} 
+                                          onChange={(e) => { const nt = [...tiers]; nt[index].name = e.target.value; setTiers(nt); }}
+                                        >
+                                          <option value="一级赔付">一级赔付</option>
+                                          <option value="二级赔付">二级赔付</option>
+                                          <option value="三级赔付">三级赔付</option>
+                                          <option value="四级赔付">四级赔付</option>
+                                        </select>
+                                      ) : t.name}
                                     </td>
                                     <td className="px-3 py-2 font-mono">
                                       {drawerMode !== 'view' ? <input className="w-16 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={t.start} onChange={(e) => { const nt = [...tiers]; nt[index].start = e.target.value; setTiers(nt); }}/> : t.start}
@@ -428,7 +439,7 @@ export default function InsuranceManagement() {
                              <table className="w-full text-left bg-[#0F172A] border border-[#1E293B] rounded mt-2">
                                 <thead>
                                   <tr className="text-[10px] text-[#64748B] border-b border-[#1E293B]">
-                                    <th className="px-3 py-2 font-medium">临时淹没时长档位</th>
+                                    <th className="px-3 py-2 font-medium">临时淹没时长档位 [h, h]</th>
                                     <th className="px-3 py-2 font-medium">赔付系数</th>
                                     <th className="px-3 py-2 font-medium">增量上浮比例</th>
                                     {drawerMode !== 'view' && <th className="px-3 py-2 font-medium text-right">操作</th>}
@@ -438,7 +449,15 @@ export default function InsuranceManagement() {
                                    {floats.map((f, index) => (
                                       <tr key={f.id}>
                                         <td className="px-3 py-2">
-                                          {drawerMode !== 'view' ? <input className="w-24 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none" value={f.duration} onChange={(e) => { const nf = [...floats]; nf[index].duration = e.target.value; setFloats(nf); }}/> : f.duration}
+                                          {drawerMode !== 'view' ? (
+                                            <div className="flex items-center gap-1">
+                                              <span>[</span>
+                                              <input className="w-12 bg-[#111622] rounded px-1 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none text-center" value={f.minDuration} onChange={(e) => { const nf = [...floats]; nf[index].minDuration = e.target.value; setFloats(nf); }} placeholder="a" />
+                                              <span>,</span>
+                                              <input className="w-12 bg-[#111622] rounded px-1 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none text-center" value={f.maxDuration} onChange={(e) => { const nf = [...floats]; nf[index].maxDuration = e.target.value; setFloats(nf); }} placeholder="b" />
+                                              <span>]</span>
+                                            </div>
+                                          ) : `[${f.minDuration}, ${f.maxDuration || '∞'}]`}
                                         </td>
                                         <td className={cn("px-3 py-2 font-mono", f.color)}>
                                           {drawerMode !== 'view' ? <input className="w-20 bg-[#111622] rounded px-2 py-1 text-xs border border-[#1E293B] focus:border-tech-cyan outline-none text-white" value={f.ratio} onChange={(e) => { const nf = [...floats]; nf[index].ratio = e.target.value; setFloats(nf); }}/> : f.ratio}
@@ -488,7 +507,7 @@ export default function InsuranceManagement() {
                       <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4">人身伤亡规则</h4>
                       <div className="space-y-3">
                          <div className="space-y-1.5">
-                           <label className="text-xs text-[#94A3B8]">每人每次赔付金额 (元) <span className="text-red-500">*</span></label>
+                           <label className="text-xs text-[#94A3B8]">每人每次赔付限额 (元) <span className="text-red-500">*</span></label>
                            <input type="number" disabled={drawerMode === 'view'} defaultValue="150000" className="w-full bg-[#0F172A] border border-[#1E293B] font-mono rounded px-3 py-2 text-xs text-white outline-none disabled:opacity-60" />
                          </div>
                          <div className="space-y-1.5">

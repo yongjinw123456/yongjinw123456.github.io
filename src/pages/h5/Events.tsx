@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, AlertTriangle, ChevronRight, FileText, Plus, X, Save, Edit, CheckCircle, Calculator } from 'lucide-react';
+import { Search, Filter, AlertTriangle, ChevronRight, FileText, Plus, X, Save, Edit, CheckCircle, Calculator, UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
@@ -25,15 +25,24 @@ export default function Events() {
       case 'view_warning':
         return (
           <div className="space-y-4">
-             <div className="bg-[#111622] p-3 rounded border border-[#1E293B]">
-               <h4 className="text-base text-white font-bold mb-2">{selectedItem?.name || '珊溪水库'} - 预警明细</h4>
-               <div className="text-sm text-[#94A3B8] space-y-2">
-                 <p><span className="text-[#64748B]">关联模型：</span> 大坝安全超警模型</p>
-                 <p><span className="text-[#64748B]">当前状态：</span> <span className="text-orange-400">橙色预警</span></p>
-                 <p><span className="text-[#64748B]">触发时间：</span> 05-12 14:00</p>
-                 <p><span className="text-[#64748B]">处理建议：</span> 建议立即组织相关人员赴现场查看，必要时启动应急预案。</p>
+             {[1, 2].map((i) => (
+               <div key={i} className="bg-[#111622] p-3 rounded border border-[#1E293B]">
+                 <div className="flex justify-between items-center mb-3 pb-2 border-b border-[#1E293B]">
+                   <span className="font-bold text-white text-base">预警记录 {i}</span>
+                   <span className={cn("text-xs px-2 py-1 rounded", i === 1 ? "bg-orange-500/20 text-orange-400" : "bg-[#1E293B] text-[#94A3B8]")}>
+                     {i === 1 ? '待处理' : '已归因'}
+                   </span>
+                 </div>
+                 <div className="grid grid-cols-2 gap-y-3 text-sm">
+                   <div><span className="text-[#64748B] block mb-0.5">预警时间</span><span className="text-white font-mono">{i === 1 ? '05-12 14:00' : '05-12 13:00'}</span></div>
+                   <div><span className="text-[#64748B] block mb-0.5">预警等级</span><span className="text-orange-400">橙色预警</span></div>
+                   <div><span className="text-[#64748B] block mb-0.5">阈值来源</span><span className="text-white">预警线</span></div>
+                   <div><span className="text-[#64748B] block mb-0.5">预警类型</span><span className="text-white">水位超汛限</span></div>
+                   <div><span className="text-[#64748B] block mb-0.5">水位线(m)</span><span className="text-white font-mono">132.50</span></div>
+                   <div><span className="text-[#64748B] block mb-0.5">数据来源</span><span className="text-white">物联设备</span></div>
+                 </div>
                </div>
-             </div>
+             ))}
           </div>
         );
       case 'process_warning':
@@ -76,6 +85,14 @@ export default function Events() {
              <div>
                <label className="text-sm font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">处理说明</label>
                <textarea className="w-full bg-[#111622] border border-[#1E293B] rounded px-3 py-2 text-base text-white outline-none h-24 resize-none" placeholder="输入说明文字..."></textarea>
+             </div>
+             
+             <div>
+               <label className="text-sm font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">处理附件</label>
+               <div className="border border-dashed border-[#1E293B] rounded-lg p-6 flex flex-col items-center justify-center text-[#64748B] hover:text-[#f59e0b] transition-colors cursor-pointer bg-[#111622]">
+                 <UploadCloud className="w-8 h-8 mb-2" />
+                 <span className="text-sm">点击或拖拽上传附件</span>
+               </div>
              </div>
           </div>
         );
@@ -230,16 +247,27 @@ export default function Events() {
       </div>
 
       {/* Filter Bar & Add Buttons */}
-      <div className="bg-[#0F172A] px-4 py-3 flex items-center justify-between gap-2 border-b border-[#1E293B]">
-        <div className="flex-1 relative">
-           <Search className="w-5 h-5 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
-           <input type="text" placeholder="搜索过滤..." className="w-full bg-[#111622] border border-[#1E293B] rounded-full pl-9 pr-4 py-2.5 text-sm text-white outline-none focus:border-tech-cyan transition-colors" />
-        </div>
+      <div className="bg-[#0F172A] px-4 py-3 flex items-center justify-between gap-2 border-b border-[#1E293B] overflow-x-auto no-scrollbar">
+        {activeTab === 'warning' && (
+           <div className="flex gap-2 w-full">
+              <select className="bg-[#111622] border border-[#1E293B] rounded-full px-3 py-2 text-sm text-white outline-none focus:border-tech-cyan min-w-[100px]">
+                 <option value="">全部水库</option>
+                 <option value="shanxi">珊溪水库</option>
+                 <option value="qiaodun">桥墩水库</option>
+              </select>
+              <select className="bg-[#111622] border border-[#1E293B] rounded-full px-3 py-2 text-sm text-white outline-none focus:border-tech-cyan min-w-[100px]">
+                 <option value="">预警状态</option>
+                 <option value="待处理">待处理</option>
+                 <option value="已处理">已处理</option>
+              </select>
+              <input type="date" className="bg-[#111622] border border-[#1E293B] rounded-full px-3 py-2 text-sm text-[#94A3B8] outline-none focus:border-tech-cyan [color-scheme:dark]" />
+           </div>
+        )}
         
         {activeTab === 'claims' && (
-           <div className="flex gap-2 shrink-0">
-             <button onClick={() => navigate('/h5/claims/calculator')} className="p-1.5 bg-[#1E293B] border border-[#334155] rounded-full text-white shrink-0 flex items-center justify-center relative">
-               <Calculator className="w-5 h-5" />
+           <div className="flex gap-2 shrink-0 ml-auto w-full justify-end">
+             <button onClick={() => navigate('/h5/claims/calculator')} className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-full text-white shrink-0 flex items-center gap-1 relative text-sm font-medium">
+               <Calculator className="w-4 h-4 text-tech-cyan" /> 理赔计算
              </button>
              <button onClick={() => openModal('create_claim')} className="px-3 py-2.5 bg-tech-cyan/10 border border-tech-cyan/20 rounded-full text-tech-cyan text-sm font-medium flex items-center gap-1 shrink-0">
                <Plus className="w-5 h-5" /> 发起理赔
@@ -266,8 +294,8 @@ export default function Events() {
                    <div className="text-sm text-white mt-0.5 font-medium">橙色预警</div>
                  </div>
                  <div>
-                   <div className="text-xs text-[#64748B]">命中阈值来源</div>
-                   <div className="text-sm text-white mt-0.5">预警线</div>
+                   <div className="text-xs text-[#64748B]">最高水位线</div>
+                   <div className="text-sm text-white mt-0.5 font-mono">135.20m</div>
                  </div>
                  <div>
                    <div className="text-xs text-[#64748B]">当前水位线</div>
@@ -340,12 +368,15 @@ export default function Events() {
                    <div className="text-xs text-[#64748B]">发起时间</div>
                    <div className="text-xs text-white mt-0.5 font-mono">05-11 10:30</div>
                  </div>
-                 <div className="text-right">
-                   <div className="text-xs text-tech-cyan underline underline-offset-2 cursor-pointer">查看理赔明细</div>
-                 </div>
               </div>
-              <div className="mt-4 pt-3 border-t border-[#1E293B]">
-                <button onClick={() => openModal('process_claim', { name: '珊溪水库' })} className="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded text-sm font-bold transition-colors">
+              <div className="mt-4 pt-3 border-t border-[#1E293B] flex gap-2">
+                <button onClick={() => openModal('view_claim', { name: '珊溪水库' })} className="flex-1 py-2 bg-[#1E293B] text-white hover:bg-[#334155] rounded text-sm font-bold transition-colors text-center">
+                   查看详情
+                </button>
+                <button onClick={() => openModal('reject_claim', { name: '珊溪水库' })} className="py-2 px-4 border border-red-500/50 text-red-400 hover:bg-red-500/10 rounded text-sm font-bold transition-colors text-center">
+                   驳回
+                </button>
+                <button onClick={() => openModal('process_claim', { name: '珊溪水库' })} className="flex-1 py-2 bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 rounded text-sm font-bold transition-colors shadow-[0_0_8px_rgba(0,242,255,0.4)] text-center">
                    确认理赔
                 </button>
               </div>

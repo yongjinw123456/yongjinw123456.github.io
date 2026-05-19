@@ -153,12 +153,6 @@ export default function ClaimsRecords() {
         </div>
         <div className="flex gap-2">
            <button 
-             className="bg-[#1E293B] text-white hover:bg-[#334155] px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors border border-[#334155]"
-           >
-             <Download className="w-4 h-4" />
-             导出
-           </button>
-           <button 
              onClick={() => openDrawer('create')}
              className="bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 font-bold px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)]"
            >
@@ -372,69 +366,71 @@ export default function ClaimsRecords() {
                  <section>
                     <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4 flex items-center gap-2">
                       <Calculator className="w-3.5 h-3.5" />
-                      理赔核算详情
+                      理赔核算信息
                     </h4>
                     
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-[#0F172A]/50 border border-[#1E293B] p-4 rounded-lg mb-6">
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-[#64748B] uppercase tracking-widest block">最高水位(m)</label>
+                          <div className="text-sm font-mono text-white">148.50</div>
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-[#64748B] uppercase tracking-widest block">总淹没时长(h)</label>
+                          <div className="text-sm font-mono text-white">72</div>
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-[#64748B] uppercase tracking-widest block">超出水位步数 N_j</label>
+                          <div className="text-sm font-mono text-white">79</div>
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-[#64748B] uppercase tracking-widest block">时间上浮比例</label>
+                          <div className="text-sm font-mono text-white">10%</div>
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-[#64748B] uppercase tracking-widest block">转移安置情况</label>
+                          <div className="text-sm font-mono text-white">5人 / ¥200</div>
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-[#64748B] uppercase tracking-widest block">伤亡情况</label>
+                          <div className="text-sm font-mono text-white">0人</div>
+                       </div>
+                    </div>
+
                     <div className="bg-[#1A2035] rounded-xl border border-[#2A344A] p-6 flex flex-col relative overflow-hidden space-y-6">
                        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                          <Calculator className="w-32 h-32" />
                        </div>
                        <div className="space-y-4 text-sm relative z-10">
-                          {/* 基础赔付 */}
                           <div className="flex justify-between items-center">
-                            <span className="text-[#94A3B8]">基础赔付金额</span>
-                            <div className="flex items-center gap-3">
-                               <input 
-                                 type="number" 
-                                 disabled={drawerMode === 'view'} 
-                                 defaultValue={activeRecord?.accidentAmount !== undefined ? activeRecord.accidentAmount : 5480000} 
-                                 className="w-32 bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1 text-right text-white font-mono outline-none disabled:opacity-60 transition-colors" 
-                               />
-                            </div>
+                            <span className="text-[#94A3B8]">阶梯事故与步长赔付总和 A</span>
+                            <span className="text-white font-mono text-base">¥3,185,000</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#94A3B8]">淹没时间上浮金额 U</span>
+                            <span className="text-white font-mono text-base">¥318,500</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#94A3B8]">基础赔付金额 (A + U)</span>
+                            <span className="text-blue-400 font-mono text-base font-bold">¥3,503,500</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#94A3B8]">每次事故绝对免赔额</span>
+                            <span className="text-red-400 font-mono text-base">-¥100,000</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#94A3B8]">免赔后事故金额</span>
+                            <span className="text-blue-400 font-mono text-base font-bold">¥3,403,500</span>
                           </div>
 
                           <div className="h-px bg-[#2A344A]/50 w-full" />
 
-                          {/* 转移安置 */}
                           <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                               <span className="text-[#94A3B8]">转移安置人数</span>
-                               <div className="flex items-center bg-[#0F172A] border border-[#1E293B] focus-within:border-tech-cyan rounded px-2 py-1 transition-colors">
-                                 <input title="转移安置人数" type="number" disabled={drawerMode==='view'} defaultValue={0} className="w-12 bg-transparent text-white text-xs text-center outline-none disabled:opacity-60"/>
-                                 <span className="text-[#64748B] text-xs">人</span>
-                               </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                               <span className="text-[#64748B] text-xs">转移安置金额:</span>
-                               <input 
-                                 type="number" 
-                                 disabled={drawerMode === 'view'} 
-                                 defaultValue={activeRecord?.relocationAmount || 0} 
-                                 className="w-32 bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1 text-right text-white font-mono outline-none disabled:opacity-60 transition-colors" 
-                               />
-                            </div>
+                            <span className="text-[#94A3B8]">转移安置金 R</span>
+                            <span className="text-orange-400 font-mono text-base">¥1,000</span>
                           </div>
-
-                          <div className="h-px bg-[#2A344A]/50 w-full" />
-
-                          {/* 人身伤亡 */}
                           <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                               <span className="text-[#94A3B8]">人身伤亡人数</span>
-                               <div className="flex items-center bg-[#0F172A] border border-[#1E293B] focus-within:border-tech-cyan rounded px-2 py-1 transition-colors">
-                                 <input title="人身伤亡人数" type="number" disabled={drawerMode==='view'} defaultValue={0} className="w-12 bg-transparent text-white text-xs text-center outline-none disabled:opacity-60"/>
-                                 <span className="text-[#64748B] text-xs">人</span>
-                               </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                               <span className="text-[#64748B] text-xs">人身伤亡赔付金额:</span>
-                               <input 
-                                 type="number" 
-                                 disabled={drawerMode === 'view'} 
-                                 defaultValue={activeRecord?.injuryAmount || 0} 
-                                 className="w-32 bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-2 py-1 text-right text-white font-mono outline-none disabled:opacity-60 transition-colors" 
-                               />
-                            </div>
+                            <span className="text-[#94A3B8]">人身伤亡赔付金 C</span>
+                            <span className="text-orange-400 font-mono text-base">¥0</span>
                           </div>
                        </div>
 
@@ -442,12 +438,12 @@ export default function ClaimsRecords() {
                        <div className="mt-4 pt-6 border-t border-[#2A344A] flex items-end justify-between relative z-10">
                           <div className="space-y-1.5">
                              <span className="text-sm font-bold text-white block">总计预计赔付</span>
-                             <span className="text-[10px] text-[#64748B] font-mono">保单防洪剩余额度: 25,000,000</span>
+                             <span className="text-[10px] text-[#64748B] font-mono">保单剩余额度: 30,000,000</span>
                           </div>
                           <div className="relative group">
                             <div className="absolute inset-0 bg-tech-cyan/20 blur-[15px] rounded-lg group-hover:bg-tech-cyan/30 transition-all"></div>
                             <span className="relative text-3xl font-mono text-tech-cyan font-bold tracking-tight px-2 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
-                              ¥{activeRecord ? activeRecord.totalAmount.toLocaleString() : '5,480,000'}
+                              ¥3,404,500
                             </span>
                           </div>
                        </div>
@@ -485,6 +481,35 @@ export default function ClaimsRecords() {
                        </div>
                     </div>
                  </section>
+
+                 {(drawerMode === 'view' || drawerMode === 'edit') && (
+                  <section>
+                    <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4">操作记录</h4>
+                    <div className="bg-[#111622] border border-[#1E293B] rounded flex flex-col overflow-hidden">
+                      <table className="w-full text-left">
+                        <thead className="bg-[#0F172A] text-[10px] text-[#64748B] uppercase tracking-widest border-b border-[#1E293B]">
+                          <tr>
+                            <th className="px-3 py-2 font-medium">操作时间</th>
+                            <th className="px-3 py-2 font-medium">操作人</th>
+                            <th className="px-3 py-2 font-medium">操作类型</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-xs text-white divide-y divide-[#1E293B]">
+                          <tr className="hover:bg-[#1E293B]/20">
+                            <td className="px-3 py-2 font-mono text-[#94A3B8]">2024-05-13 14:00</td>
+                            <td className="px-3 py-2">系统理赔专员</td>
+                            <td className="px-3 py-2 text-green-400">理赔确认</td>
+                          </tr>
+                          <tr className="hover:bg-[#1E293B]/20">
+                            <td className="px-3 py-2 font-mono text-[#94A3B8]">2024-05-12 15:30</td>
+                            <td className="px-3 py-2">管理员</td>
+                            <td className="px-3 py-2 text-blue-400">新增理赔</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                 )}
 
               </div>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, MapPin, AlertTriangle, ShieldCheck, FileText, X, Edit, Eye, ChevronRight } from 'lucide-react';
+import { Search, Plus, MapPin, AlertTriangle, ShieldCheck, FileText, X, Edit, Eye, ChevronRight, Droplets, History, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -27,6 +27,11 @@ export default function ReservoirManagement() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [activeRecord, setActiveRecord] = useState<ReservoirRecord | null>(null);
+
+  const [isInsuranceDrawerOpen, setIsInsuranceDrawerOpen] = useState(false);
+  const [isWaterLevelDrawerOpen, setIsWaterLevelDrawerOpen] = useState(false);
+  const [wlTab, setWlTab] = useState<'add'|'history'>('add');
+
 
   const openDrawer = (mode: 'create' | 'edit' | 'view', record?: ReservoirRecord) => {
     setDrawerMode(mode);
@@ -60,148 +65,116 @@ export default function ReservoirManagement() {
             BUSINESS / RESERVOIR MANAGEMENT
           </p>
         </div>
-        <button 
-          onClick={() => openDrawer('create')}
-          className="bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 font-bold px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)]"
-        >
-          <Plus className="w-4 h-4" />
-          新建水库
-        </button>
+        <div className="flex gap-2">
+           <button 
+             onClick={() => openDrawer('create')}
+             className="bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 font-bold px-4 py-2 rounded flex items-center gap-2 text-sm transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)]"
+           >
+             <Plus className="w-4 h-4" />
+             新增水库标的
+           </button>
+        </div>
       </header>
 
       {/* Filter Section */}
-      <div className="bg-[#111622] border border-[#1E293B] rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">水库名称</label>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-[#475569]" />
-              <input type="text" placeholder="输入名称查询" className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded pl-8 pr-3 py-1.5 text-xs text-white outline-none transition-colors placeholder:text-[#475569]" />
-            </div>
+      <div className="flex flex-col xl:flex-row gap-4 xl:items-center justify-between shrink-0 bg-[#111622] p-4 rounded-xl border border-[#1E293B]">
+        <div className="flex gap-4 items-center shrink-0">
+          <div className="relative w-64">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" />
+            <input 
+              type="text" 
+              placeholder="搜索水库名称..." 
+              className="w-full bg-[#0F172A] border border-[#1E293B] rounded-lg pl-9 pr-4 py-2 text-sm text-white outline-none focus:border-tech-cyan transition-colors"
+            />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">所属地区</label>
-            <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white outline-none appearance-none cursor-pointer">
-              <option value="">全部地区 (省/市/区县)</option>
-              <option value="zj-wz">浙江省 - 温州市</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">承保状态</label>
-            <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white outline-none appearance-none cursor-pointer">
-              <option value="">全部状态</option>
-              <option value="未承保">未承保</option>
-              <option value="未生效">未生效</option>
-              <option value="保障中">保障中</option>
-              <option value="已过保">已过保</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">预警状态</label>
-            <select className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white outline-none appearance-none cursor-pointer">
-              <option value="">全部分级</option>
-              <option value="正常">正常</option>
-              <option value="黄色">黄色预警</option>
-              <option value="橙色">橙色预警</option>
-              <option value="红色">红色预警</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest">监管单位</label>
-            <input type="text" placeholder="输入监管单位" className="w-full bg-[#0F172A] border border-[#1E293B] focus:border-tech-cyan rounded px-3 py-1.5 text-xs text-white outline-none transition-colors placeholder:text-[#475569]" />
-          </div>
+          <select className="bg-[#0F172A] border border-[#1E293B] rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-tech-cyan transition-colors">
+            <option value="">全部状态</option>
+            <option value="保障中">保障中</option>
+            <option value="已过保">已过保</option>
+            <option value="未承保">未承保</option>
+          </select>
         </div>
       </div>
 
-      {/* Grid Section */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0 gap-4 mt-2">
-        <div className="flex-1 overflow-y-auto no-scrollbar">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4">
-            {MOCK_LIST.map((row) => (
-              <div key={row.id} className="bg-[#111622] border border-[#1E293B] rounded-lg overflow-hidden flex flex-col hover:border-[#334155] transition-colors relative group">
-                <div className="p-4 flex-1">
-                   <div className="flex justify-between items-start mb-3">
-                      <div>
-                         <h3 className="text-base font-bold text-white mb-1 group-hover:text-tech-cyan transition-colors">{row.name}</h3>
-                         <div className="flex items-center text-xs text-[#64748B] gap-1">
-                           <MapPin className="w-3 h-3" />
-                           <span className="truncate max-w-[180px]" title={row.location}>{row.location}</span>
-                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                         <span className={cn("px-2 py-0.5 rounded border text-[10px] whitespace-nowrap", getStatusColor(row.insuranceStatus))}>
-                           {row.insuranceStatus}
-                         </span>
-                         <button 
-                            onClick={() => row.warningStatus !== '正常' && navigate(`/risk/warning?reservoirId=${row.id}`)}
-                            className={cn("px-2 py-0.5 rounded border text-[10px] whitespace-nowrap inline-flex items-center gap-1", 
-                              getStatusColor(row.warningStatus),
-                              row.warningStatus !== '正常' && "hover:brightness-125 cursor-pointer"
-                            )}
-                         >
-                           {row.warningStatus !== '正常' && <AlertTriangle className="w-3 h-3" />}
-                           {row.warningStatus}
-                         </button>
-                      </div>
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-6 relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+           {MOCK_LIST.map((row) => (
+             <div key={row.id} className="bg-[#111622] border border-[#1E293B] rounded-xl overflow-hidden hover:border-[#334155] transition-all group flex flex-col">
+               <div className="p-4 flex-1">
+                 <div className="flex justify-between items-start mb-4">
+                   <div className="flex items-center gap-2">
+                     <h3 className="font-bold text-white text-base">{row.name}</h3>
+                     <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest", getStatusColor(row.insuranceStatus))}>
+                       {row.insuranceStatus}
+                     </span>
                    </div>
+                 </div>
+                 
+                 <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate" title={row.location}>{row.location}</span>
+                    </div>
 
-                   <div className="grid grid-cols-2 gap-3 mt-4">
-                      <div className="bg-[#0F172A] border border-[#1E293B] rounded p-2 flex flex-col justify-center">
-                         <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1">当前水位</div>
-                         {row.currentLevel ? (
-                            <button 
-                              onClick={() => navigate(`/monitoring/realtime?reservoirId=${row.id}`)}
-                              className="font-mono text-tech-cyan hover:underline flex items-baseline text-lg text-left"
-                            >
-                              {row.currentLevel.toFixed(2)}<span className="text-[10px] text-[#64748B] ml-0.5">m</span>
-                            </button>
-                          ) : (
-                            <span className="text-[#475569] text-xs h-[28px] flex items-center">暂无数据</span>
-                          )}
-                      </div>
-                      <div className="bg-[#0F172A] border border-[#1E293B] rounded p-2 flex flex-col justify-center">
-                         <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-widest mb-1">最近监测时间</div>
-                         {row.lastMonitorTime ? (
-                            <button 
-                              onClick={() => navigate(`/monitoring/realtime?reservoirId=${row.id}`)}
-                              className="font-mono text-[#94A3B8] hover:text-tech-cyan hover:underline text-xs text-left"
-                            >
-                              {row.lastMonitorTime.split(' ')[0]}<br/>
-                              {row.lastMonitorTime.split(' ')[1]}
-                            </button>
-                          ) : (
-                            <span className="text-[#475569] text-xs h-[28px] flex items-center">--</span>
-                          )}
-                      </div>
-                   </div>
-                </div>
-                
-                <div className="p-3 border-t border-[#1E293B] bg-[#0F172A] flex items-center justify-between">
-                   <button 
-                     onClick={() => {}}
-                     className={cn("flex items-center justify-center gap-1.5 px-3 py-1.5 rounded transition-colors text-xs font-medium w-fit", row.insuranceStatus === '保障中' ? "bg-tech-cyan/10 text-tech-cyan border border-tech-cyan/20 hover:bg-tech-cyan/20" : "bg-[#1E293B] text-[#475569] cursor-not-allowed")} 
-                     disabled={row.insuranceStatus !== '保障中'}
-                   >
-                     <ShieldCheck className="w-3.5 h-3.5" />
-                     保险方案
-                   </button>
-                   <div className="flex items-center gap-1">
-                      <button 
-                        onClick={() => openDrawer('view', row)}
-                        className="p-1.5 text-[#64748B] hover:text-white hover:bg-[#1E293B] rounded transition-colors" title="基本信息"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => openDrawer('edit', row)}
-                        className="p-1.5 text-[#64748B] hover:text-tech-cyan hover:bg-[#1E293B] rounded transition-colors" title="编辑"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                   </div>
-                </div>
-              </div>
-            ))}
+                    <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#1E293B]">
+                       <div>
+                         <span className="text-[10px] text-[#64748B] uppercase tracking-widest block mb-1">当前水位</span>
+                         <div className="flex items-baseline gap-1">
+                           <span className="text-xl font-bold font-mono text-white">{row.currentLevel ? row.currentLevel.toFixed(2) : '--'}</span>
+                           {row.currentLevel && <span className="text-xs text-[#64748B]">m</span>}
+                         </div>
+                       </div>
+                       <div>
+                         <span className="text-[10px] text-[#64748B] uppercase tracking-widest block mb-1">预警状态</span>
+                         <div className="flex items-center gap-1.5 mt-1.5">
+                            <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold border", getStatusColor(row.warningStatus))}>{row.warningStatus}</span>
+                         </div>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+
+               <div className="bg-[#0F172A] p-3 flex items-center justify-between border-t border-[#1E293B] shrink-0">
+                  <div className="text-[10px] text-[#64748B] flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    更新: {row.lastMonitorTime || '--'}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                     <button 
+                       onClick={() => { setActiveRecord(row); setIsInsuranceDrawerOpen(true); }}
+                       className={cn("flex items-center justify-center gap-1.5 px-3 py-1.5 rounded transition-colors text-xs font-medium w-fit", row.insuranceStatus === '保障中' ? "bg-tech-cyan/10 text-tech-cyan border border-tech-cyan/20 hover:bg-tech-cyan/20" : "bg-[#1E293B] text-[#475569] cursor-not-allowed")} 
+                       disabled={row.insuranceStatus !== '保障中'}
+                     >
+                       <ShieldCheck className="w-3.5 h-3.5" />
+                       保险方案
+                     </button>
+                     <button 
+                       onClick={() => { setActiveRecord(row); setIsWaterLevelDrawerOpen(true); }}
+                       className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded transition-colors text-xs font-medium w-fit bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
+                     >
+                       <Droplets className="w-3.5 h-3.5" />
+                       水位填报
+                     </button>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                     <button 
+                       onClick={() => openDrawer('view', row)}
+                       className="p-1.5 text-[#64748B] hover:text-white hover:bg-[#1E293B] rounded transition-colors" title="基本信息"
+                     >
+                       <Eye className="w-4 h-4" />
+                     </button>
+                     <button 
+                       onClick={() => openDrawer('edit', row)}
+                       className="p-1.5 text-[#64748B] hover:text-tech-cyan hover:bg-[#1E293B] rounded transition-colors" title="编辑"
+                     >
+                       <Edit className="w-4 h-4" />
+                     </button>
+                  </div>
+               </div>
+             </div>
+           ))}
           </div>
         </div>
 
@@ -213,7 +186,6 @@ export default function ReservoirManagement() {
              <button className="px-2 py-1 border border-[#1E293B] rounded hover:bg-[#1E293B] hover:text-white transition-colors disabled:opacity-50">下一页</button>
           </div>
         </div>
-      </div>
 
       {/* Drawer */}
       <AnimatePresence>
@@ -357,6 +329,289 @@ export default function ReservoirManagement() {
                     <button onClick={() => setDrawerMode('edit')} className="px-4 py-2 rounded text-xs font-bold bg-[#1E293B] text-white hover:bg-[#475569] transition-colors border border-tech-cyan/30">
                       切换至编辑
                    </button>
+                 )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Insurance Drawer */}
+      <AnimatePresence>
+        {isInsuranceDrawerOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsInsuranceDrawerOpen(false)} className="fixed inset-0 bg-[#0B0F17]/80 backdrop-blur-sm z-40" />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 right-0 h-full w-[600px] bg-[#111622] border-l border-[#1E293B] shadow-[0_0_40px_rgba(0,0,0,0.8)] z-50 flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-[#1E293B] bg-[#0F172A] shrink-0">
+                 <h3 className="text-sm font-bold text-white flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-tech-cyan" /> 保险详情 - {activeRecord?.name}</h3>
+                 <button onClick={() => setIsInsuranceDrawerOpen(false)} className="p-1 text-[#64748B] hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                 {/* 基础信息 */}
+                 <section>
+                    <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4 flex items-center gap-2">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      基础信息
+                    </h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">保单号</label>
+                        <div className="text-sm text-white font-mono bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B]">INS202405001</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">承保对象</label>
+                        <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B]">{activeRecord?.name || '--'}</div>
+                      </div>
+                      <div className="space-y-1.5 col-span-2">
+                        <label className="text-xs text-[#94A3B8]">保险期限</label>
+                        <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] w-full">2024.01.01 - 2025.01.01</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">保险费 (元)</label>
+                        <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono w-full">300,000</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">每次事故绝对免赔额 (元)</label>
+                        <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono w-full">100,000</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">年累计赔偿限额 (元)</label>
+                        <div className="text-sm text-green-400 bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono w-full">30,000,000</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">承保公司</label>
+                        <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] w-full">太平洋财产保险</div>
+                      </div>
+                    </div>
+                 </section>
+
+                 {/* 联系人 */}
+                 <section className="bg-[#0F172A]/50 border border-[#1E293B] rounded p-4">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">保险业务员</label>
+                        <div className="text-sm text-white bg-[#111622] px-3 py-2 rounded border border-[#1E293B] w-full">孙七</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">业务员联系方式</label>
+                        <div className="text-sm text-white bg-[#111622] px-3 py-2 rounded border border-[#1E293B] w-full font-mono">13500005555</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">理赔人员</label>
+                        <div className="text-sm text-white bg-[#111622] px-3 py-2 rounded border border-[#1E293B] w-full">周八</div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-[#94A3B8]">理赔人员联系方式</label>
+                        <div className="text-sm text-white bg-[#111622] px-3 py-2 rounded border border-[#1E293B] w-full font-mono">13400006666</div>
+                      </div>
+                    </div>
+                 </section>
+
+                 {/* 阶梯与上浮 */}
+                 <section>
+                    <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4">事故赔付与上浮配置</h4>
+                    <div className="space-y-6">
+                      {/* 阶梯 */}
+                      <div className="bg-[#111622] border border-[#1E293B] rounded p-4">
+                        <h5 className="text-xs text-white font-bold mb-3">阶梯赔付配置</h5>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left bg-[#0F172A] border border-[#1E293B] rounded">
+                            <thead>
+                              <tr className="text-[10px] text-[#64748B] border-b border-[#1E293B]">
+                                <th className="px-3 py-2 font-medium">阶梯名称</th>
+                                <th className="px-3 py-2 font-medium">起始水位(m)</th>
+                                <th className="px-3 py-2 font-medium">结束水位(m)</th>
+                                <th className="px-3 py-2 font-medium">固定金额(元)</th>
+                                <th className="px-3 py-2 font-medium">单价(元/cm)</th>
+                                <th className="px-3 py-2 font-medium">区间上限(元)</th>
+                              </tr>
+                            </thead>
+                            <tbody className="text-xs text-white divide-y divide-[#1E293B]">
+                               <tr>
+                                 <td className="px-3 py-2">一级赔付</td>
+                                 <td className="px-3 py-2 font-mono">142.04</td>
+                                 <td className="px-3 py-2 font-mono">144.04</td>
+                                 <td className="px-3 py-2 font-mono">400,000</td>
+                                 <td className="px-3 py-2 font-mono">0</td>
+                                 <td className="px-3 py-2 font-mono">400,000</td>
+                               </tr>
+                               <tr>
+                                 <td className="px-3 py-2">二级赔付</td>
+                                 <td className="px-3 py-2 font-mono">144.04</td>
+                                 <td className="px-3 py-2 font-mono">147.71</td>
+                                 <td className="px-3 py-2 font-mono">2,000,000</td>
+                                 <td className="px-3 py-2 font-mono">0</td>
+                                 <td className="px-3 py-2 font-mono">2,000,000</td>
+                               </tr>
+                               <tr>
+                                 <td className="px-3 py-2">三级赔付</td>
+                                 <td className="px-3 py-2 font-mono">147.71</td>
+                                 <td className="px-3 py-2 font-mono">--</td>
+                                 <td className="px-3 py-2 font-mono">30,000,000</td>
+                                 <td className="px-3 py-2 font-mono">15,000</td>
+                                 <td className="px-3 py-2 font-mono">30,000,000</td>
+                               </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* 上浮 */}
+                      <div className="bg-[#111622] border border-[#1E293B] rounded p-4">
+                        <h5 className="text-xs text-white font-bold mb-3">多阶梯淹没时间赔付上浮条件</h5>
+                        <div className="overflow-x-auto">
+                           <table className="w-full text-left bg-[#0F172A] border border-[#1E293B] rounded">
+                            <thead>
+                              <tr className="text-[10px] text-[#64748B] border-b border-[#1E293B]">
+                                <th className="px-3 py-2 font-medium">条件名称</th>
+                                <th className="px-3 py-2 font-medium">淹没时间(H)范围</th>
+                                <th className="px-3 py-2 font-medium">赔付上浮比例(k)</th>
+                              </tr>
+                            </thead>
+                            <tbody className="text-xs text-white divide-y divide-[#1E293B]">
+                               <tr>
+                                 <td className="px-3 py-2">时间条件1</td>
+                                 <td className="px-3 py-2 font-mono">0 ≤ H &lt; 24</td>
+                                 <td className="px-3 py-2 font-mono">0%</td>
+                               </tr>
+                               <tr>
+                                 <td className="px-3 py-2">时间条件2</td>
+                                 <td className="px-3 py-2 font-mono">24 ≤ H &lt; 48</td>
+                                 <td className="px-3 py-2 font-mono">5%</td>
+                               </tr>
+                               <tr>
+                                 <td className="px-3 py-2">时间条件3</td>
+                                 <td className="px-3 py-2 font-mono">H ≥ 48</td>
+                                 <td className="px-3 py-2 font-mono">10%</td>
+                               </tr>
+                            </tbody>
+                           </table>
+                        </div>
+                      </div>
+                    </div>
+                 </section>
+
+                 {/* 分项规则 */}
+                 <div className="grid grid-cols-2 gap-6">
+                    <section>
+                      <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4">转移安置规则</h4>
+                      <div className="space-y-3">
+                         <div className="space-y-1.5">
+                           <label className="text-xs text-[#94A3B8]">每人每次赔付金额 (元)</label>
+                           <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono">200</div>
+                         </div>
+                         <div className="space-y-1.5">
+                           <label className="text-xs text-[#94A3B8]">每次赔付限额 (元)</label>
+                           <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono">500,000</div>
+                         </div>
+                         <div className="space-y-1.5">
+                           <label className="text-xs text-[#94A3B8]">年累计赔付限额 (元)</label>
+                           <div className="text-sm text-blue-400 bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono">2,000,000</div>
+                         </div>
+                      </div>
+                    </section>
+                    <section>
+                      <h4 className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest border-b border-[#1E293B] pb-2 mb-4">人身伤亡规则</h4>
+                      <div className="space-y-3">
+                         <div className="space-y-1.5">
+                           <label className="text-xs text-[#94A3B8]">每人每次赔付限额 (元)</label>
+                           <div className="text-sm text-white bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono">150,000</div>
+                         </div>
+                         <div className="space-y-1.5">
+                           <label className="text-xs text-[#94A3B8]">年累计赔付限额 (元)</label>
+                           <div className="text-sm text-blue-400 bg-[#0F172A] px-3 py-2 rounded border border-[#1E293B] font-mono">5,000,000</div>
+                         </div>
+                      </div>
+                    </section>
+                 </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Water Level Reporter Drawer */}
+      <AnimatePresence>
+        {isWaterLevelDrawerOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsWaterLevelDrawerOpen(false)} className="fixed inset-0 bg-[#0B0F17]/80 backdrop-blur-sm z-40" />
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 right-0 h-full w-[480px] bg-[#111622] border-l border-[#1E293B] shadow-[0_0_40px_rgba(0,0,0,0.8)] z-50 flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-[#1E293B] bg-[#0F172A]">
+                 <h3 className="text-sm font-bold text-white flex items-center gap-2"><Droplets className="w-4 h-4 text-blue-400" /> 水位填报 - {activeRecord?.name}</h3>
+                 <button onClick={() => setIsWaterLevelDrawerOpen(false)} className="p-1 text-[#64748B] hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="flex gap-4 px-6 pt-4 bg-[#0F172A] border-b border-[#1E293B]">
+                 <button onClick={() => setWlTab('add')} className={cn("pb-2 text-xs font-bold border-b-2 transition-colors", wlTab === 'add' ? "border-tech-cyan text-tech-cyan" : "border-transparent text-[#64748B] hover:text-white")}>新增水位</button>
+                 <button onClick={() => setWlTab('history')} className={cn("pb-2 text-xs font-bold border-b-2 transition-colors", wlTab === 'history' ? "border-tech-cyan text-tech-cyan" : "border-transparent text-[#64748B] hover:text-white")}>历史水位</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col pt-0 mt-4">
+                 {wlTab === 'add' ? (
+                   <div className="space-y-4 flex-1 flex flex-col">
+                     <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded mb-4 flex gap-2"><AlertTriangle className="shrink-0 w-4 h-4" />这只是用于在未关联水位监测设备的情况下手动上报。</div>
+                     
+                     <div className="flex gap-4">
+                       <div className="space-y-1.5 flex-1">
+                         <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">选择日期</label>
+                         <input type="date" defaultValue="2024-05-12" className="w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none focus:border-tech-cyan transition-colors" />
+                       </div>
+                       <div className="space-y-1.5 flex-1">
+                         <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">批量设置水位 (m)</label>
+                         <div className="flex gap-2">
+                           <input type="number" step="0.01" className="flex-1 w-full bg-[#0F172A] border border-[#1E293B] rounded px-3 py-2 text-xs text-white outline-none focus:border-tech-cyan transition-colors font-mono" placeholder="如 142.50" />
+                           <button className="px-3 py-2 bg-[#1E293B] hover:bg-[#334155] text-white rounded text-xs transition-colors shrink-0">应用</button>
+                         </div>
+                       </div>
+                     </div>
+
+                     <div className="space-y-2 mt-4 flex-1 flex flex-col min-h-0">
+                        <label className="text-[10px] text-[#94A3B8] uppercase tracking-widest">24小时水位填报</label>
+                        <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-2 pb-4">
+                           {Array.from({length: 24}).map((_, i) => (
+                             <div key={i} className="flex items-center gap-2 bg-[#0F172A] px-3 py-1.5 rounded border border-[#1E293B] focus-within:border-tech-cyan transition-colors">
+                               <span className="text-[#64748B] text-xs font-mono w-10">{i.toString().padStart(2, '0')}:00</span>
+                               <input type="number" step="0.01" className="flex-1 w-full bg-transparent text-xs text-white outline-none text-right font-mono" placeholder="水位" />
+                               <span className="text-[#64748B] text-[10px]">m</span>
+                             </div>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="pt-4 border-t border-[#1E293B] mt-auto">
+                        <button onClick={() => setIsWaterLevelDrawerOpen(false)} className="px-4 py-2.5 rounded text-sm font-bold bg-tech-cyan text-[#0B0F17] hover:bg-tech-cyan/90 w-full transition-colors shadow-[0_0_10px_rgba(0,242,255,0.3)]">确认提交</button>
+                     </div>
+                   </div>
+                 ) : (
+                   <div className="flex-1 flex flex-col min-h-0">
+                      <div className="flex justify-between items-center bg-[#0F172A] p-2 rounded border border-[#1E293B] mb-4 shrink-0">
+                        <input type="date" defaultValue="2024-05-12" className="bg-transparent text-xs text-white outline-none focus:text-tech-cyan transition-colors px-2 cursor-pointer" />
+                        <button className="text-[#0B0F17] bg-tech-cyan hover:bg-tech-cyan/90 text-xs font-medium px-4 py-1.5 rounded transition-colors shadow-[0_0_10px_rgba(0,242,255,0.2)]">查询</button>
+                      </div>
+                      
+                      <div className="flex-1 overflow-y-auto pr-2 min-h-0">
+                        <table className="w-full text-left bg-[#0F172A] border border-[#1E293B] rounded relative">
+                          <thead className="sticky top-0 bg-[#0F172A] z-10 shadow-sm">
+                            <tr className="text-[10px] text-[#64748B] border-b border-[#1E293B] uppercase tracking-widest"><th className="px-3 py-2">时间</th><th className="px-3 py-2">水位(m)</th><th className="px-3 py-2 text-right">操作</th></tr>
+                          </thead>
+                          <tbody className="text-xs text-white divide-y divide-[#1E293B]">
+                            {Array.from({length: 24}).map((_, i) => {
+                              const hour = 23 - i;
+                              const baseLevel = activeRecord?.currentLevel || 142.50;
+                              return (
+                                <tr key={i} className="hover:bg-[#1E293B]/30 group">
+                                  <td className="px-3 py-2 font-mono text-[#94A3B8]">{hour.toString().padStart(2, '0')}:00</td>
+                                  <td className="px-3 py-2">
+                                    <input type="number" defaultValue={(baseLevel - (23-hour)*0.01).toFixed(2)} className="w-20 bg-[#111622] px-2 py-1 rounded border border-[#334155] outline-none text-white font-mono focus:border-tech-cyan transition-colors" />
+                                  </td>
+                                  <td className="px-3 py-2 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button className="text-tech-cyan hover:underline text-xs bg-tech-cyan/10 px-2 py-1 rounded">保存修改</button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                   </div>
                  )}
               </div>
             </motion.div>

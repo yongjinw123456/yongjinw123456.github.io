@@ -121,13 +121,6 @@ export default function Login() {
                 登录 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
-
-            <div className="mt-8 pt-8 border-t border-[#1E293B] text-center">
-              <p className="text-xs text-[#64748B]">需要以管护员身份访问？</p>
-              <button onClick={() => navigate('/h5/login')} className="mt-2 text-sm text-tech-cyan hover:text-cyan-400 transition-colors">
-                切换至移动端登录
-              </button>
-            </div>
           </div>
         </div>
       </div>
